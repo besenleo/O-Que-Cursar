@@ -1,0 +1,11 @@
+*.db
+*.pyc
+.idea/
+.pytest_cache/
+__pycache__/
+launch.json
+settings.json
+venv/
+/build/
+database.ini
+*.egg-info
