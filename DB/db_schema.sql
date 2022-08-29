@@ -15,7 +15,7 @@ create table if not exists professor(
     id_prof          integer unique not null,
     titulo           varchar(30)    not null,
     constraint pk_professor primary key(id_prof),
-    constraint fk_professor_usuario foreign key usuario(id_user) on delete cascade
+    constraint fk_professor_usuario foreign key (id_prof) references usuario(id_user) on delete cascade
 );
 
 ---------------------------------------------------------------
@@ -56,5 +56,5 @@ create table if not exists comentario(
     id_usuario      integer        not null,
     constraint pk_comentario primary key(id_comentario),
     constraint fk_comentario_post foreign key(id_post) references post(id_post) on delete cascade,
-    constraint fk_comentario_usuario foreign key(id_usuario) references usuario(id_usuario) on delete cascade
+    constraint fk_comentario_usuario foreign key(id_usuario) references usuario(id_user) on delete cascade
 );
