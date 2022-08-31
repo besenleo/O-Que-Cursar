@@ -9,5 +9,6 @@ setup(
     url='https://github.com/besenleo/O-Que-Cursar',
     author='Leonardo Henrique Besen',
     author_email='leo_besen@yahoo.com.br',
-    install_requires=['psycopg2']
+    install_requires=['psycopg2',
+                      'flask']
 )

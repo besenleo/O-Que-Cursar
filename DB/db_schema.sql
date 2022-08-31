@@ -1,10 +1,11 @@
 create table if not exists usuario(
     -- Essa tabela armazena os dados dos usuarios
-    id_user          integer unique not null,
-    nome             varchar(50)    not null,
-    email            varchar(50)    not null,
-    senha            varchar(30)    not null, -- TODO: Senhas nao devem ser armazenadas em plain text no database
-    status_perfil    boolean        not null,
+    id_user          serial      unique   not null,
+    nome             varchar(50)          not null,
+    email            varchar(50) unique   not null,
+    senha            varchar(30)          not null, -- TODO: Senhas nao devem ser armazenadas em plain text no database
+    status_perfil    boolean              not null,
+    administrador    boolean              not null,
     constraint pk_aluno primary key(id_user)
 );
 
@@ -12,7 +13,7 @@ create table if not exists usuario(
 
 create table if not exists professor(
     -- Essa tabela armazena os dados dos professores
-    id_prof          integer unique not null,
+    id_prof          serial  unique not null,
     titulo           varchar(30)    not null,
     constraint pk_professor primary key(id_prof),
     constraint fk_professor_usuario foreign key (id_prof) references usuario(id_user) on delete cascade
