@@ -10,5 +10,6 @@ setup(
     author='Leonardo Henrique Besen',
     author_email='leo_besen@yahoo.com.br',
     install_requires=['psycopg2',
-                      'flask']
+                      'flask',
+                      'flask-sqlalchemy']
 )

@@ -9,3 +9,4 @@ venv/
 /build/
 database.ini
 *.egg-info
+DB/config.cfg

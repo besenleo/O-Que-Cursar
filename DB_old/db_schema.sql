@@ -6,17 +6,8 @@ create table if not exists usuario(
     senha            varchar(30)          not null, -- TODO: Senhas nao devem ser armazenadas em plain text no database
     status_perfil    boolean              not null,
     administrador    boolean              not null,
+    professor        boolean              not null,
     constraint pk_aluno primary key(id_user)
-);
-
----------------------------------------------------------------
-
-create table if not exists professor(
-    -- Essa tabela armazena os dados dos professores
-    id_prof          serial  unique not null,
-    titulo           varchar(30)    not null,
-    constraint pk_professor primary key(id_prof),
-    constraint fk_professor_usuario foreign key (id_prof) references usuario(id_user) on delete cascade
 );
 
 ---------------------------------------------------------------
@@ -43,7 +34,7 @@ create table if not exists post(
     id_prof         integer        not null,
     constraint pk_post primary key(id_post),
     constraint fk_post_curso foreign key(id_curso) references curso(id_curso) on delete cascade,
-    constraint fk_post_professor foreign key(id_prof) references professor(id_prof) on delete cascade
+    constraint fk_post_usuario foreign key(id_prof) references usuario(id_usuario) on delete cascade
 );
 
 ---------------------------------------------------------------
