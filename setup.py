@@ -11,5 +11,7 @@ setup(
     author_email='leo_besen@yahoo.com.br',
     install_requires=['psycopg2',
                       'flask',
-                      'flask-sqlalchemy']
+                      'flask-sqlalchemy',
+                      'Flask-WTF',
+                      'email-validator']
 )
