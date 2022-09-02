@@ -17,6 +17,9 @@ def is_safe_url(target):
     return test_url.scheme in ('http', 'https') and  ref_url.netloc == test_url.netloc
 
 def create_app():
+    """"
+    Cria o Flask app
+    """
     # Criando e configurando Flask app
     app = Flask(__name__)
     app.config.from_pyfile('DB\config.cfg')
@@ -26,7 +29,7 @@ def create_app():
     db.init_app(app)
     serializer = URLSafeTimedSerializer(app.secret_key)
    
-    # Conectado User model e LoginManager
+    # Conectado User model e LoginManager, valida se o token da sessao esta valido.
     @login_manager.user_loader
     def carregar_usuario(token_sessao):
         # coleta informação do usuario
@@ -35,14 +38,14 @@ def create_app():
         if usuario:
             try: 
                 serializer.loads(token_sessao, max_age=app.config['TIME_TO_EXPIRE'])
-            except:
+            except SignatureExpired:
                 usuario.token_sessao = None
                 db.session.commit()
                 return None
         
         return usuario
 
-    # Redirect para logins e fresh_logins
+    # Redirect para logins e fresh_logins quando a sessao expira/usuario nao esta logado
     login_manager.login_view = 'login'
     login_manager.login_message = 'Para acessar a página entre com seu usuario e senha'
     login_manager.refresh_view = 'login'
@@ -60,18 +63,17 @@ def create_app():
 
     @app.route('/login', methods=['GET', 'POST'])
     def login():
+        # Loga o usuario
         if request.method == 'POST':
             email = request.form.get('email')
             senha = request.form.get('senha')
             lembre = request.form.get('lembre_de_mim')
-
+            # Valida se as informações do form com o Database
             usuario = Usuario.query.filter(Usuario.email == email).first()
             
-            if not usuario:
-                return '<h1>Usuario não esta cadastrado<\h1>'
-
-            if senha != usuario.senha:
-                return '<h1>Senha ou usuario errado!<\h1>'
+            if not usuario or senha != usuario.senha:
+                # TODO: mandar para o login com a mensagem de errps no form
+                return '<h1>Usuario ou senha incorretos!<\h1>'
             
             # Muda o token da sessao toda vez que o usuario loga
             token_sessao = serializer.dumps([usuario.email, usuario.senha])
@@ -79,14 +81,16 @@ def create_app():
             db.session.commit()
 
             login_user(usuario, remember=lembre)
-
+            # Redirect para pagina que o usuario estava tentando acessar
             if 'next' in session and session['next']:
                 if is_safe_url(session['next']): 
                     return redirect(session['next'])
             
             return redirect(url_for('index'))
 
+        # Salva a pagina que o usuario estava tentando acessar sem estar logado
         session['next'] = request.args.get('next')
+
         return render_template('login.html')
     
     @app.route('/logout')
