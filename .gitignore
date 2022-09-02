@@ -11,3 +11,4 @@ database.ini
 *.egg-info
 DB/config.cfg
 DB_DEPRECATED/
+notas.txt

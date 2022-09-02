@@ -1,8 +1,10 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin
 
+login_manager = LoginManager()
 db = SQLAlchemy()
 
-class Usuario(db.Model):
+class Usuario(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key= True)
     nome = db.Column(db.String(30), nullable=False)
     sobrenome = db.Column(db.String(30), nullable= False)
@@ -11,9 +13,13 @@ class Usuario(db.Model):
     status_perfil = db.Column(db.Boolean, nullable=False, default=True)
     administrador = db.Column(db.Boolean, nullable=False, default=False)
     professor = db.Column(db.Boolean, nullable=False, default=False)
+    token_sessao = db.Column(db.String(100), unique=True)
 
     posts = db.relationship('Post', backref='usuario', lazy='dynamic')
     comentarios = db.relationship('Comentario', backref='usuario', lazy='dynamic')
+
+    def get_id(self):
+        return self.token_sessao
 
 
 class Curso(db.Model):
