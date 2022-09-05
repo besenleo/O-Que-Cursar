@@ -1,62 +1,43 @@
+from flask_security import ConfirmRegisterForm
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SelectField
-from wtforms.validators import InputRequired, Length, Email
+from wtforms import StringField, SelectField
+from wtforms.validators import InputRequired, Length
 
 
-class LoginForm(FlaskForm):
-    email = StringField('email', validators=[
-        InputRequired(),
-        Email()
-    ])
-    senha = PasswordField('senha', validators=[
-        InputRequired(),
-        Length(max=30)
-    ])
-
-
-class RegistroForm(FlaskForm):
-    nome = StringField('nome', validators=[
+class ExtendedRegisterForm(ConfirmRegisterForm):
+    first_name = StringField('Nome', validators=[
         InputRequired(),
         Length(min=3, max=30)
     ])
-    sobrenome = StringField('nome', validators=[
+    last_name = StringField('Sobrenome', validators=[
         InputRequired(),
         Length(min=3, max=30)
     ])
-    email = StringField('email', validators=[
-        InputRequired(),
-        Email()
-    ])
-    senha = PasswordField('senha', validators=[
-        InputRequired(),
-        Length(min=8, max=30)
-    ])
 
-
-class CursoForm(FlaskForm):
-    nome = StringField('nome', validators=[
+class CourseForm(FlaskForm):
+    name = StringField('Nome', validators=[
         InputRequired(),
         Length(min=3, max=50)
     ])
-    descricao = StringField('nome', validators=[
+    description = StringField('Descrição', validators=[
         InputRequired(),
         Length(max=300)
     ])
-    tipo_curso = SelectField('Programming Language', choices=[
+    type = SelectField('Tipo do Curso', choices=[
         ('Licenciatura', 'Licenciatura'), 
         ('Graduação', 'Graduação'), 
         ('Pós-Graduação', 'Pós-Graduação')], validators=[InputRequired()])
 
 
 class PostForm(FlaskForm):
-    conteudo = StringField('nome', validators=[
+    content = StringField('Conteudo', validators=[
         InputRequired(),
         Length(max=300)
     ])
     #TODO: curso, Provavelmente um SelectField dinamico que passa o objeto do DB?
 
-class ComentarioForm(FlaskForm):
-    conteudo = StringField('nome', validators=[
+class CommentForm(FlaskForm):
+    content = StringField('Conteudo', validators=[
         InputRequired(),
         Length(max=300)
     ])

@@ -54,3 +54,32 @@ no Windows: venv\Scripts\activate
 ```
 
 Realize esses passos antes de instalar as dependencias do projeto e defina o sua IDE de escolha para usar esse ambiente virtual criado. Quando você for usar a linha de comando lembre-se de rodar o comadando para ativar o ambiente virtual.
+
+## Arquivos de configuração necessarios
+
+Para que o site funcione você precisa criar dois arquivos de configuração na raiz do projeto `config.cfg` e `mail_config.cfg`. Note que você vai precisar utilizar um servidor SMTP a sua preferencia para enviar e-mails em nome do site. Veja abaixo exemplo desses arquivos:
+
+- config.cfg:
+```
+SQLALCHEMY_DATABASE_URI='postgresql://usuario:senha@hostname_do_seu_banco/nome_do_banco'
+SQLALCHEMY_TRACK_MODIFICATIONS=False
+SECRET_KEY='sua_secret_key_string'
+SECURITY_PASSWORD_SALT='seu_password_salt_string'
+SECURITY_REGISTERABLE=True
+SECURITY_RECOVERABLE=True
+SECURITY_CHANGEABLE=True
+SECURITY_CONFIRMABLE=True
+SECURITY_SEND_REGISTER_EMAIL=True
+SECURITY_EMAIL_SENDER='no-reply@oquecursar.com'
+```
+
+- mail_config.cfg
+```
+MAIL_SERVER='smtp.gmail.com'
+MAIL_USERNAME='seuemail@gmail.com'
+MAIL_PASSWORD='sua_senha'
+MAIL_DEFAULT_SENDER='no-reply@oquecursar.com'
+MAIL_PORT=587
+MAIL_USE_SSL=False
+MAIL_USE_TLS=True
+```

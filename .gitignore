@@ -9,6 +9,7 @@ venv/
 /build/
 database.ini
 *.egg-info
-DB/config.cfg
-DB_DEPRECATED/
 notas.txt
+mail_config.cfg
+config.cfg
+dist
