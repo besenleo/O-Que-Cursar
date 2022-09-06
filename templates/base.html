@@ -9,6 +9,21 @@
     {% endblock %}
 </head>
 <body>
+    <h2> Menu </h2>
+    <ul>
+        {% if not current_user.is_authenticated %}
+        <li><a href="{{ url_for_security('login') }}">Login</a></li>
+        <li><a href="{{ url_for_security('register') }}">Register</a><br/></li>
+        {% endif %}
+        {% if current_user.is_authenticated and current_user.has_role('admin') %}
+        <li><a href="{{ url_for('gerenciar_cursos') }}">Gerenciar Cursos</a><br/></li>
+        {% endif %}
+        {% if current_user.is_authenticated %}
+        <li><a href="{{ url_for('perfil') }}">Perfil</a></li>
+        <li><a href="{{ url_for_security('logout') }}">Logout</a><br/></li>
+        {% endif %}
+      </ul>
+
     {% block body %}
 
     {% endblock %}
