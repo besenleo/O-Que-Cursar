@@ -1,9 +1,11 @@
-from flask import Flask, render_template, url_for, redirect, request, session
+from email import message
+from flask import Flask, render_template, url_for, redirect, request, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
-from flask_security import login_required, current_user, SQLAlchemyUserDatastore, Security
+from flask_security import login_required, roles_required, current_user, \
+                        SQLAlchemyUserDatastore, Security
 from models.model import db, User, Role, Course, Post, Comment
-from forms import ExtendedRegisterForm
+from forms import ExtendedRegisterForm, CourseForm
 
 def create_app():
     """"
@@ -28,12 +30,35 @@ def create_app():
     # Defining routes
     @app.route('/')
     def index():
-        return render_template('index.html')
+        return render_template('index.html', current_user=current_user)
     
     @app.route('/perfil')
     @login_required
     def perfil():
-        return f'<h1> Olá, {current_user.first_name} {current_user.last_name}</h1>' 
+        return render_template('perfil.html', current_user=current_user) 
+
+    @app.route('/gerenciar_cursos', methods=['GET', 'POST'])
+    @roles_required('admin')
+    def gerenciar_cursos():
+        form = CourseForm()
+        
+        if form.validate_on_submit():
+            nome = form.name.data
+            descricao = form.description.data
+            tipo = form.type.data
+
+            course = Course(name=nome, description=descricao, type=tipo)
+
+            try: 
+                db.session.add(course)
+                db.session.commit()
+                flash('Curso adicionado com sucesso!', 'success')
+            except:
+                flash('Não foi possivel adicionado com sucesso!', 'error')\
+        
+        courses = Course.query.all()
+
+        return render_template('gerenciar_cursos.html', current_user=current_user, form=form, courses=courses)
 
     return app
 

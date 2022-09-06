@@ -1,6 +1,6 @@
 from flask_security import ConfirmRegisterForm
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField
+from wtforms import StringField, SelectField, TextAreaField
 from wtforms.validators import InputRequired, Length
 
 
@@ -19,13 +19,13 @@ class CourseForm(FlaskForm):
         InputRequired(),
         Length(min=3, max=50)
     ])
-    description = StringField('Descrição', validators=[
+    description = TextAreaField('Descrição', validators=[
         InputRequired(),
-        Length(max=300)
+        Length(max=1000)
     ])
     type = SelectField('Tipo do Curso', choices=[
-        ('Licenciatura', 'Licenciatura'), 
-        ('Graduação', 'Graduação'), 
+        ('Graduação', 'Graduação'),
+        ('Licenciatura', 'Licenciatura'),  
         ('Pós-Graduação', 'Pós-Graduação')], validators=[InputRequired()])
 
 
