@@ -53,12 +53,51 @@ def create_app():
                 db.session.add(course)
                 db.session.commit()
                 flash('Curso adicionado com sucesso!', 'success')
+                return redirect(url_for('gerenciar_cursos'))
             except:
-                flash('Não foi possivel adicionado com sucesso!', 'error')\
+                db.session.rollback()
+                flash('Falha ao adicionar curso', 'error')
+                return redirect(url_for('gerenciar_cursos'))
         
         courses = Course.query.all()
 
         return render_template('gerenciar_cursos.html', current_user=current_user, form=form, courses=courses)
+
+    @app.route('/editar_cursos/<course_id>', methods=['GET','POST'])
+    @roles_required('admin')
+    def editar_curso(course_id):
+        course = Course.query.filter(Course.id == course_id).first()
+        form = CourseForm(name=course.name, description=course.description, type=course.type)
+        
+        if form.validate_on_submit():
+            try: 
+                course.name = form.name.data
+                course.description = form.description.data
+                course.type = form.type.data
+                db.session.commit()
+                flash('Curso editado com sucesso!', 'success')
+                return redirect(url_for('gerenciar_cursos'))
+            except:
+                db.session.rollback()
+                flash('Falha ao editar curso', 'error')
+                return redirect(url_for('gerenciar_cursos'))
+
+        return render_template('editar_curso.html', current_user=current_user, form=form, course=course)
+
+    @app.route('/excluir_cursos/<course_id>')
+    @roles_required('admin')
+    def excluir_curso(course_id):
+        course = Course.query.filter(Course.id == course_id).first()
+        try: 
+            db.session.delete(course)
+            db.session.commit()
+            flash('Curso removido com sucesso!', 'success')
+        except:
+            db.session.rollback()
+            flash('Falha ao remover curso', 'error')
+
+        return redirect(url_for('gerenciar_cursos'))
+
 
     return app
 
