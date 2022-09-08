@@ -1,0 +1,33 @@
+{% from "_macros.html" import render_field_with_errors %}
+{% extends "base.html" %}
+
+{% block header %}
+{% block title %} Gerenciar Usuarios {% endblock %}
+{% endblock %}
+
+{% block body %}
+    <h1> Gerenciar Permissões </h1>
+    <br>
+    {% include "_messages.html" %}
+    <br>
+    <h2> Gerenciar Permissões dos Usuarios</h2>
+    <ul>
+    {% for user in users %}
+        <li>
+            {{ user.first_name }} {{ user.last_name }} ({{ user.email }})
+            {% if not user.has_role('admin')%}
+            <a href="{{ url_for('promover_usuario', user_id=user.id, role='admin') }}"> - Promover a Administrador </a>
+            {% endif %}
+            {% if user.has_role('admin')%}
+            <a href="{{ url_for('rebaixar_usuario', user_id=user.id, role='admin') }}"> - Remover Administrador </a>
+            {% endif %}
+            {% if not user.has_role('mentor')%}
+            <a href="{{ url_for('promover_usuario', user_id=user.id, role='mentor') }}"> - Promover a Mentor </a>
+            {% endif %}
+            {% if user.has_role('mentor')%}
+            <a href="{{ url_for('rebaixar_usuario', user_id=user.id, role='mentor') }}"> - Remover Mentor </a>
+            {% endif %}
+        </li>
+    {% endfor %}
+    </ul>
+{% endblock %}

@@ -8,9 +8,10 @@
 {% block body %}
     <h1> Gerenciar Cursos </h1>
     <br>
-    <h2> Adicionar Curso</h2>
     {% include "_messages.html" %}
-    <form method="POST" action="{{ url_for('gerenciar_cursos') }}">
+    <br>
+    <h2> Adicionar Curso</h2>
+    <form method="POST" action="{{ url_for('gerenciar_cursos')}}">
         {{ form.csrf_token }}
         {{ render_field_with_errors(form.name) }}
         {{ render_field_with_errors(form.description) }}
@@ -21,7 +22,7 @@
     <h2> Lista de Cursos</h2>
     <ul>
     {% for course in courses %}
-        <li>{{ course.name }}</li>   
+        <li>{{ course.name }} <a href="{{ url_for('editar_curso', course_id=course.id) }}"> Editar </a> <a href="{{ url_for('excluir_curso', course_id=course.id) }}"> Remover </a></li>
     {% endfor %}
     </ul>
 {% endblock %}
