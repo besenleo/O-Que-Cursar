@@ -16,7 +16,7 @@ def create_app():
     app.config.from_pyfile('config.cfg')       # Importing app configuration 
     app.config.from_pyfile('mail_config.cfg')  # Importing mail configuration
     
-    # # Giving app context to Flask-Mail
+    # Giving app context to Flask-Mail
     mail = Mail()
     mail.init_app(app)
 
@@ -97,6 +97,54 @@ def create_app():
             flash('Falha ao remover curso', 'error')
 
         return redirect(url_for('gerenciar_cursos'))
+    
+    @app.route('/gerenciar_usuarios')
+    @roles_required('admin')
+    def gerenciar_usuarios():
+        users = User.query.all()
+        return render_template('gerenciar_usuarios.html', current_user=current_user, users=users)
+    
+    @app.route('/promover_usuario/<user_id>/<role>')
+    @roles_required('admin')
+    def promover_usuario(user_id, role):
+        user = User.query.filter(User.id == user_id).first()
+        db_role = user_datastore.find_role(role)
+
+        if not db_role:
+            flash(f'Permissão invalida!', 'error')
+            return redirect(url_for('gerenciar_usuarios'))
+
+        if not user.has_role(role):
+            try:
+                user_datastore.add_role_to_user(user=user, role=db_role)
+                db.session.commit()
+                flash(f'Usuario {user.email} promovido para {role}', 'success')
+            except:
+                db.session.rollback()
+                flash(f'Não foi possivel adicionar permissão!')
+
+        return redirect(url_for('gerenciar_usuarios'))
+
+    @app.route('/rebaixar_usuario/<user_id>/<role>')
+    @roles_required('admin')
+    def rebaixar_usuario(user_id, role):
+        user = User.query.filter(User.id == user_id).first()
+        db_role = user_datastore.find_role(role)
+
+        if not db_role:
+            flash(f'Permissão invalida!', 'error')
+            return redirect(url_for('gerenciar_usuarios'))
+
+        if user.has_role(role):
+            try:
+                user_datastore.remove_role_from_user(user=user, role=db_role)
+                db.session.commit()
+                flash(f'Usuario {user.email} rebaixado de {role}', 'success')
+            except:
+                db.session.rollback()
+                flash(f'Não foi possivel remover permissão!')
+
+        return redirect(url_for('gerenciar_usuarios'))
 
 
     return app
