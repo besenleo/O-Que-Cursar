@@ -46,7 +46,6 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key= True)
     content = db.Column(db.String(300), nullable=False)
     creation_date = db.Column(db.DateTime, nullable=False)
-    id_course = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
     id_user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     courses = db.relationship('Course', secondary=posts_courses, back_populates='posts')

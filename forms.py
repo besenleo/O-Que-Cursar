@@ -1,7 +1,7 @@
 from flask_security import ConfirmRegisterForm
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, TextAreaField
-from wtforms.validators import InputRequired, Length
+from wtforms import StringField, SelectField, TextAreaField, HiddenField, SelectMultipleField
+from wtforms.validators import InputRequired, Length, NumberRange
 
 
 class ExtendedRegisterForm(ConfirmRegisterForm):
@@ -30,15 +30,19 @@ class CourseForm(FlaskForm):
 
 
 class PostForm(FlaskForm):
-    content = StringField('Conteudo', validators=[
+    content = TextAreaField('Conteudo', validators=[
         InputRequired(),
         Length(max=300)
     ])
-    #TODO: curso, Provavelmente um SelectField dinamico que passa o objeto do DB?
+    courses = SelectMultipleField('Cursos', validators=[InputRequired()])
+
 
 class CommentForm(FlaskForm):
-    content = StringField('Conteudo', validators=[
+    content = TextAreaField('Comentario', validators=[
         InputRequired(),
         Length(max=300)
+    ])
+    post_id = HiddenField('Post_id', validators=[
+        InputRequired()
     ])
  

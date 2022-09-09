@@ -8,22 +8,34 @@
 {% block body %}
     <h1> {{ course.name }} </h1>
     {% include "_messages.html" %}
-    <h2> Post</h2>
+    {% if current_user.is_authenticated and current_user.has_role('mentor') %}
+    <h2> Criar Post </h2>
     <form method="POST" action="{{ url_for('curso_home', course_name=course.name)}}">
-        {{ form.csrf_token }}
-        {{ render_field_with_errors(form.content) }}
+        {{ form_post.csrf_token }}
+        {{ render_field_with_errors(form_post.courses) }}
+        {{ render_field_with_errors(form_post.content) }}
         <input type="submit" value="Postar">
     </form>
     <br>
+    {% endif %}
     <h2> Posts Recentes</h2>
     {% for post in posts %}
     <div>
         <ul>
-            <li> {{ post.user.name }} </li>
-            <li> {{ post.description }} </li>
+            <li> {{ post.user.first_name }} {{ post.user.last_name }} </li>
+            <li> {{ post.content }} </li>
+            {% if current_user.is_authenticated  %}
+            <form method="POST" action="{{ url_for('curso_home', course_name=course.name)}}">
+                {{ form_comment.csrf_token }}
+                {{ form_comment.post_id(value=post.id) }}
+                {{ render_field_with_errors(form_comment.content) }}
+                <input type="submit" value="Comentar">
+            </form>
+            {% endif %}
+            <p> Comentarios: </p>
             <ul>
                 {% for comment in post.comments %}
-                <li> {{ comment.user.name }}: {{ comment.content }}</li>
+                <li> {{ comment.user.first_name }} {{ comment.user.last_name }}: {{ comment.content }}</li>
                 {% endfor %}
             </ul>
         </ul>

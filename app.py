@@ -1,12 +1,12 @@
 from datetime import datetime
-from email import message
-from flask import Flask, render_template, url_for, redirect, request, session, flash
-from flask_sqlalchemy import SQLAlchemy
+from re import T
+from flask import Flask, render_template, url_for, redirect, flash
+from sqlalchemy import exists
 from flask_mail import Mail
 from flask_security import login_required, roles_required, current_user, \
                         SQLAlchemyUserDatastore, Security
 from model import db, User, Role, Course, Post, Comment
-from forms import ExtendedRegisterForm, CourseForm, PostForm
+from forms import ExtendedRegisterForm, CourseForm, PostForm, CommentForm
 from flask_migrate import Migrate
 
 migrate = Migrate()
@@ -156,35 +156,65 @@ def create_app():
         courses = Course.query.all()
         return render_template('cursos.html', current_user=current_user, courses=courses)
     
-    @app.route('/cursos/<course_name>')
+    @app.route('/cursos/<course_name>', methods=['GET', 'POST'])
     def curso_home(course_name):
-        form = PostForm()
+        # Instantiating forms 
+        form_post = PostForm()
+        form_comment = CommentForm()
+        # Query objects on database to populate template
         course = Course.query.filter(Course.name == course_name).first()
         posts = Post.query.filter(Post.courses.any(Course.name == course_name))
-        
-        if form.validate_on_submit():
+        # Creating dynamic field for Post Form
+        courses = Course.query.all()
+        form_post.courses.choices = [(c.name, c.name) for c in courses]
+        form_post.courses.data = [course.name] # Default selects course
+        # Post form action
+        if form_post.validate_on_submit():
+            content = form_post.content.data
+            courses_form = form_post.courses.data
+            
             try: 
-                content = form.description.data
-                courses = form.description.data
-
-                post = Post(content=content, creation_date=datetime.now())
-                # Adding author to post
-                post.user.append(current_user)
+                post = Post(content=content, creation_date=datetime.now(), user = current_user)            
                 # Adding the courses to post
-                for course in courses:
-                    post.courses.append(course)
+                for course_form in courses_form:
+                    for course in courses:
+                        if course.name == course_form:
+                            post.courses.append(course)
                 db.session.add(post)
                 db.session.commit()
+                print(post.courses)
                 flash('Post criado com sucesso!', 'success')
+                return redirect(url_for('curso_home', course_name=course.name))
             except:
                 db.session.rollback()
-                flash('Falha ao criar post!', 'error')
+                flash(f'Falha ao criar post!', 'error')
+                return redirect(url_for('curso_home', course_name=course.name))
+        # Comment Form action
+        if form_comment.validate_on_submit():
+            content = form_comment.content.data
+            post_id_form = form_comment.post_id.data
+            
+            try:
+                # Querying database to check if post exists
+                post_id = int(post_id_form)
+                if 0 < Post.query.filter(Post.id == post_id).count() < 2:
+                    comment = Comment(content=content, creation_date=datetime.now(), id_post=post_id)
+                    # Adding author to comment
+                    comment.user = current_user
+                    db.session.add(comment)
+                    db.session.commit()
+                    return redirect(url_for('curso_home', course_name=course.name))
+                else:
+                    db.session.rollback()
+                    flash('Falha ao fazer comentario!', 'error')
+                    return redirect(url_for('curso_home', course_name=course.name))
+            except:
+                db.session.rollback()
+                flash('Falha ao fazer comentario!', 'error')
+                return redirect(url_for('curso_home', course_name=course.name))
         
-        
-        return render_template('curso_home.html', current_user=current_user, course=course, posts=posts, form=form)
-
-
-
+        return render_template('curso_home.html', current_user=current_user, course=course, 
+                                posts=posts, form_post=form_post, form_comment=form_comment)
 
     return app
 
