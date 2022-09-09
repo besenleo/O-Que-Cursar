@@ -2,7 +2,7 @@
 {% extends "base.html" %}
 
 {% block header %}
-{% block title %} Gerenciar Cursos {% endblock %}
+{% block title %} {{ course.name }} {% endblock %}
 {% endblock %}
 
 {% block body %}
@@ -12,7 +12,6 @@
     <h2> Criar Post </h2>
     <form method="POST" action="{{ url_for('curso_home', course_name=course.name)}}">
         {{ form_post.csrf_token }}
-        {{ render_field_with_errors(form_post.courses) }}
         {{ render_field_with_errors(form_post.content) }}
         <input type="submit" value="Postar">
     </form>
@@ -23,6 +22,7 @@
     <div>
         <ul>
             <li> {{ post.user.first_name }} {{ post.user.last_name }} </li>
+            <li> {{ post.creation_date.strftime('%d/%m/%Y %H:%M') }}</li>
             <li> {{ post.content }} </li>
             {% if current_user.is_authenticated  %}
             <form method="POST" action="{{ url_for('curso_home', course_name=course.name)}}">
@@ -35,7 +35,7 @@
             <p> Comentarios: </p>
             <ul>
                 {% for comment in post.comments %}
-                <li> {{ comment.user.first_name }} {{ comment.user.last_name }}: {{ comment.content }}</li>
+                <li> {{ comment.user.first_name }} {{ comment.user.last_name }} ({{ post.creation_date.strftime('%d/%m/%Y %H:%M')}}): {{ comment.content }}</li>
                 {% endfor %}
             </ul>
         </ul>
