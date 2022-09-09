@@ -37,7 +37,7 @@ def create_app():
     def index():
         return render_template('index.html', current_user=current_user)
     
-    
+
     @app.route('/perfil')
     @login_required
     def perfil():
@@ -257,5 +257,37 @@ def create_app():
                 return redirect(url_for('criar_post'))
         return render_template('criar_post.html', current_user=current_user, form=form)
 
-    return app
+    @app.route('/post/<post_id>', methods=['GET', 'POST'])
+    @login_required
+    def post(post_id):
+        form = CommentForm()
 
+        post_obj = Post.query.filter(Post.id == post_id).first()
+
+        if form.validate_on_submit():
+            content = form.content.data
+            post_id_form = form.post_id.data
+            
+            try:
+                # Querying database to check if post exists
+                post_id_int = int(post_id_form)
+                if 0 < Post.query.filter(Post.id == post_id_int).count() < 2:
+                    comment = Comment(content=content, creation_date=datetime.now(), id_post=post_id_int)
+                    # Adding author to comment
+                    comment.user = current_user
+                    db.session.add(comment)
+                    db.session.commit()
+                    return redirect(url_for('post', post_id=post_id_int))
+                else:
+                    db.session.rollback()
+                    flash('Falha ao fazer comentario!', 'error')
+                    return redirect(url_for('post', post_id=post_id_int))
+            except:
+                db.session.rollback()
+                flash('Falha ao fazer comentario!', 'error')
+                return redirect(url_for('post', post_id=post_id_int))
+    
+        return render_template('post.html', current_user=current_user, form=form, post=post_obj)
+
+
+    return app

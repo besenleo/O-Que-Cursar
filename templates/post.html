@@ -1,0 +1,31 @@
+{% from "_macros.html" import render_field_with_errors %}
+{% extends "base.html" %}
+
+{% block header %}
+{% block title %} Post {% endblock %}
+{% endblock %}
+
+{% block body %}
+    <div>
+        <ul>
+            <li> {{ post.user.first_name }} {{ post.user.last_name }} </li>
+            <li> {{ post.creation_date.strftime('%d/%m/%Y %H:%M') }}</li>
+            <li> {{ post.content }} </li>
+            {% if current_user.is_authenticated  %}
+            <form method="POST" action="{{ url_for('post', post_id=post.id)}}">
+                {{ form.csrf_token }}
+                {{ form.post_id(value=post.id) }}
+                {{ render_field_with_errors(form.content) }}
+                <input type="submit" value="Comentar">
+            </form>
+            {% endif %}
+            <p> Comentarios: </p>
+            <ul>
+                {% for comment in post.comments %}
+                <li> {{ comment.user.first_name }} {{ comment.user.last_name }} ({{ post.creation_date.strftime('%d/%m/%Y %H:%M')}}): {{ comment.content }}</li>
+                {% endfor %}
+            </ul>
+        </ul>
+    </div>
+    <br>
+{% endblock %}

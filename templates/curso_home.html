@@ -23,8 +23,9 @@
         <ul>
             <li> {{ post.user.first_name }} {{ post.user.last_name }} </li>
             <li> {{ post.creation_date.strftime('%d/%m/%Y %H:%M') }}</li>
-            <li> {{ post.content }} </li>
+            <li> {{ post.content }}  </li>
             {% if current_user.is_authenticated  %}
+            <li><a href="{{ url_for('post', post_id=post.id)}}"> Ver detalhes </a></li>
             <form method="POST" action="{{ url_for('curso_home', course_name=course.name)}}">
                 {{ form_comment.csrf_token }}
                 {{ form_comment.post_id(value=post.id) }}
