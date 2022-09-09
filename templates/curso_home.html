@@ -1,0 +1,46 @@
+{% from "_macros.html" import render_field_with_errors %}
+{% extends "base.html" %}
+
+{% block header %}
+{% block title %} {{ course.name }} {% endblock %}
+{% endblock %}
+
+{% block body %}
+    <h1> {{ course.name }} </h1>
+    {% include "_messages.html" %}
+    {% if current_user.is_authenticated and current_user.has_role('mentor') %}
+    <h2> Criar Post </h2>
+    <form method="POST" action="{{ url_for('curso_home', course_name=course.name)}}">
+        {{ form_post.csrf_token }}
+        {{ render_field_with_errors(form_post.content) }}
+        <input type="submit" value="Postar">
+    </form>
+    <br>
+    {% endif %}
+    <h2> Posts Recentes</h2>
+    {% for post in posts %}
+    <div>
+        <ul>
+            <li> {{ post.user.first_name }} {{ post.user.last_name }} </li>
+            <li> {{ post.creation_date.strftime('%d/%m/%Y %H:%M') }}</li>
+            <li> {{ post.content }} </li>
+            {% if current_user.is_authenticated  %}
+            <form method="POST" action="{{ url_for('curso_home', course_name=course.name)}}">
+                {{ form_comment.csrf_token }}
+                {{ form_comment.post_id(value=post.id) }}
+                {{ render_field_with_errors(form_comment.content) }}
+                <input type="submit" value="Comentar">
+            </form>
+            {% endif %}
+            <p> Comentarios: </p>
+            <ul>
+                {% for comment in post.comments %}
+                <li> {{ comment.user.first_name }} {{ comment.user.last_name }} ({{ post.creation_date.strftime('%d/%m/%Y %H:%M')}}): {{ comment.content }}</li>
+                {% endfor %}
+            </ul>
+        </ul>
+    </div>
+    <br>
+    {% endfor %}
+    
+{% endblock %}

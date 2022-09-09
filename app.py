@@ -1,11 +1,15 @@
-from email import message
-from flask import Flask, render_template, url_for, redirect, request, session, flash
-from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
+from re import T
+from flask import Flask, render_template, url_for, redirect, flash
+from sqlalchemy import exists
 from flask_mail import Mail
 from flask_security import login_required, roles_required, current_user, \
                         SQLAlchemyUserDatastore, Security
-from models.model import db, User, Role, Course, Post, Comment
-from forms import ExtendedRegisterForm, CourseForm
+from model import db, User, Role, Course, Post, Comment
+from forms import ExtendedRegisterForm, CourseForm, PostForm, CommentForm
+from flask_migrate import Migrate
+
+migrate = Migrate()
 
 def create_app():
     """"
@@ -20,7 +24,8 @@ def create_app():
     mail = Mail()
     mail.init_app(app)
 
-    db.init_app(app) # Giving app context to SQLAlchemy
+    db.init_app(app)          # Giving app context to SQLAlchemy
+    migrate.init_app(app, db) # Giving app context to Flask-Migrate
 
     # Setup Flask-Security
     user_datastore = SQLAlchemyUserDatastore(db, User, Role)        # Registring o User e Role model
@@ -32,10 +37,12 @@ def create_app():
     def index():
         return render_template('index.html', current_user=current_user)
     
+    
     @app.route('/perfil')
     @login_required
     def perfil():
         return render_template('perfil.html', current_user=current_user) 
+
 
     @app.route('/gerenciar_cursos', methods=['GET', 'POST'])
     @roles_required('admin')
@@ -63,6 +70,7 @@ def create_app():
 
         return render_template('gerenciar_cursos.html', current_user=current_user, form=form, courses=courses)
 
+
     @app.route('/editar_cursos/<course_id>', methods=['GET','POST'])
     @roles_required('admin')
     def editar_curso(course_id):
@@ -84,6 +92,7 @@ def create_app():
 
         return render_template('editar_curso.html', current_user=current_user, form=form, course=course)
 
+
     @app.route('/excluir_cursos/<course_id>')
     @roles_required('admin')
     def excluir_curso(course_id):
@@ -98,12 +107,14 @@ def create_app():
 
         return redirect(url_for('gerenciar_cursos'))
     
+
     @app.route('/gerenciar_usuarios')
     @roles_required('admin')
     def gerenciar_usuarios():
         users = User.query.all()
         return render_template('gerenciar_usuarios.html', current_user=current_user, users=users)
     
+
     @app.route('/promover_usuario/<user_id>/<role>')
     @roles_required('admin')
     def promover_usuario(user_id, role):
@@ -124,6 +135,7 @@ def create_app():
                 flash(f'Não foi possivel adicionar permissão!')
 
         return redirect(url_for('gerenciar_usuarios'))
+
 
     @app.route('/rebaixar_usuario/<user_id>/<role>')
     @roles_required('admin')
@@ -146,6 +158,104 @@ def create_app():
 
         return redirect(url_for('gerenciar_usuarios'))
 
+
+    @app.route('/cursos')
+    def cursos():
+        courses = Course.query.all()
+        return render_template('cursos.html', current_user=current_user, courses=courses)
+    
+
+    @app.route('/cursos/<course_name>', methods=['GET', 'POST'])
+    def curso_home(course_name):
+        # Instantiating forms 
+        form_post = PostForm()
+        form_comment = CommentForm()
+        # Query objects on database to populate template
+        course = Course.query.filter(Course.name == course_name).first()
+        posts = Post.query.filter(Post.courses.any(Course.name == course_name))
+        # Creating dynamic field for Post Form
+        courses = Course.query.all()
+        form_post.courses.choices = [(c.name, c.name) for c in courses]
+        # Post form action
+        if form_post.validate_on_submit():
+            content = form_post.content.data
+            courses_form = form_post.courses.data
+            
+            print(courses_form)
+
+            try: 
+                post = Post(content=content, creation_date=datetime.now(), user = current_user)            
+                # Adding the courses to post
+                for course_form in courses_form:
+                    for course in courses:
+                        if course.name == course_form:
+                            post.courses.append(course)
+                db.session.add(post)
+                db.session.commit()
+                print(post.courses)
+                return redirect(url_for('curso_home', course_name=course.name))
+            except:
+                db.session.rollback()
+                flash(f'Falha ao criar post!', 'error')
+                return redirect(url_for('curso_home', course_name=course.name))
+        # Comment Form action
+        if form_comment.validate_on_submit():
+            content = form_comment.content.data
+            post_id_form = form_comment.post_id.data
+            
+            try:
+                # Querying database to check if post exists
+                post_id = int(post_id_form)
+                if 0 < Post.query.filter(Post.id == post_id).count() < 2:
+                    comment = Comment(content=content, creation_date=datetime.now(), id_post=post_id)
+                    # Adding author to comment
+                    comment.user = current_user
+                    db.session.add(comment)
+                    db.session.commit()
+                    return redirect(url_for('curso_home', course_name=course.name))
+                else:
+                    db.session.rollback()
+                    flash('Falha ao fazer comentario!', 'error')
+                    return redirect(url_for('curso_home', course_name=course.name))
+            except:
+                db.session.rollback()
+                flash('Falha ao fazer comentario!', 'error')
+                return redirect(url_for('curso_home', course_name=course.name))
+        
+        return render_template('curso_home.html', current_user=current_user, course=course, 
+                                posts=posts, form_post=form_post, form_comment=form_comment)
+
+
+    @app.route('/criar_post', methods=['GET', 'POST'])
+    @roles_required('mentor')
+    def criar_post():
+        # Instantiating form 
+        form = PostForm()
+        # Creating dynamic field for Post Form
+        courses = Course.query.all()
+        form.courses.choices = [(c.name, c.name) for c in courses]
+        # Post form action
+        if form.validate_on_submit():
+            content = form.content.data
+            courses_form = form.courses.data
+
+            try: 
+                post = Post(content=content, creation_date=datetime.now(), user = current_user)            
+                # Adding the courses to post
+                for course_form in courses_form:
+                    for course in courses:
+                        if course.name == course_form:
+                            post.courses.append(course)
+                db.session.add(post)
+                db.session.commit()
+                print(post.courses)
+                flash('Post criado com sucesso!', 'success')
+                return redirect(url_for('criar_post'))
+            except:
+                db.session.rollback()
+                flash(f'Falha ao criar post!', 'error')
+                return redirect(url_for('criar_post'))
+        return render_template('criar_post.html', current_user=current_user, form=form)
 
     return app
 

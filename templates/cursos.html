@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block header %}
+{% block title %} Cursos {% endblock %}
+{% endblock %}
+
+{% block body %}
+    <h1> Cursos </h1>
+    {% include "_messages.html" %}
+    {% for course in courses %}
+        <li>
+            <a href="{{ url_for('curso_home', course_name=course.name) }}">{{ course.name }}</a>
+        </li>
+    {% endfor %}
+    </ul>
+{% endblock %}
