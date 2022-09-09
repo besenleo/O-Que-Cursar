@@ -1,11 +1,15 @@
+from datetime import datetime
 from email import message
 from flask import Flask, render_template, url_for, redirect, request, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
 from flask_security import login_required, roles_required, current_user, \
                         SQLAlchemyUserDatastore, Security
-from models.model import db, User, Role, Course, Post, Comment
-from forms import ExtendedRegisterForm, CourseForm
+from model import db, User, Role, Course, Post, Comment
+from forms import ExtendedRegisterForm, CourseForm, PostForm
+from flask_migrate import Migrate
+
+migrate = Migrate()
 
 def create_app():
     """"
@@ -20,7 +24,8 @@ def create_app():
     mail = Mail()
     mail.init_app(app)
 
-    db.init_app(app) # Giving app context to SQLAlchemy
+    db.init_app(app)          # Giving app context to SQLAlchemy
+    migrate.init_app(app, db) # Giving app context to Flask-Migrate
 
     # Setup Flask-Security
     user_datastore = SQLAlchemyUserDatastore(db, User, Role)        # Registring o User e Role model
@@ -145,6 +150,40 @@ def create_app():
                 flash(f'Não foi possivel remover permissão!')
 
         return redirect(url_for('gerenciar_usuarios'))
+
+    @app.route('/cursos')
+    def cursos():
+        courses = Course.query.all()
+        return render_template('cursos.html', current_user=current_user, courses=courses)
+    
+    @app.route('/cursos/<course_name>')
+    def curso_home(course_name):
+        form = PostForm()
+        course = Course.query.filter(Course.name == course_name).first()
+        posts = Post.query.filter(Post.courses.any(Course.name == course_name))
+        
+        if form.validate_on_submit():
+            try: 
+                content = form.description.data
+                courses = form.description.data
+
+                post = Post(content=content, creation_date=datetime.now())
+                # Adding author to post
+                post.user.append(current_user)
+                # Adding the courses to post
+                for course in courses:
+                    post.courses.append(course)
+                db.session.add(post)
+                db.session.commit()
+                flash('Post criado com sucesso!', 'success')
+            except:
+                db.session.rollback()
+                flash('Falha ao criar post!', 'error')
+        
+        
+        return render_template('curso_home.html', current_user=current_user, course=course, posts=posts, form=form)
+
+
 
 
     return app

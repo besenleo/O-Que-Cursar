@@ -1,0 +1,34 @@
+{% from "_macros.html" import render_field_with_errors %}
+{% extends "base.html" %}
+
+{% block header %}
+{% block title %} Gerenciar Cursos {% endblock %}
+{% endblock %}
+
+{% block body %}
+    <h1> {{ course.name }} </h1>
+    {% include "_messages.html" %}
+    <h2> Post</h2>
+    <form method="POST" action="{{ url_for('curso_home', course_name=course.name)}}">
+        {{ form.csrf_token }}
+        {{ render_field_with_errors(form.content) }}
+        <input type="submit" value="Postar">
+    </form>
+    <br>
+    <h2> Posts Recentes</h2>
+    {% for post in posts %}
+    <div>
+        <ul>
+            <li> {{ post.user.name }} </li>
+            <li> {{ post.description }} </li>
+            <ul>
+                {% for comment in post.comments %}
+                <li> {{ comment.user.name }}: {{ comment.content }}</li>
+                {% endfor %}
+            </ul>
+        </ul>
+    </div>
+    <br>
+    {% endfor %}
+    
+{% endblock %}

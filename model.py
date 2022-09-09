@@ -7,6 +7,9 @@ roles_users = db.Table('roles_users',
               db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
               db.Column('role_id', db.Integer(), db.ForeignKey('role.id')))
 
+posts_courses = db.Table('posts_courses',
+                db.Column('post_id', db.Integer(), db.ForeignKey('post.id')),
+                db.Column('course_id', db.Integer(), db.ForeignKey('course.id')))
 
 class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -25,18 +28,18 @@ class User(db.Model, UserMixin):
 
     roles = db.relationship('Role', secondary=roles_users, 
                             backref=db.backref('users', lazy='dynamic'))
-    posts = db.relationship('Post', backref='users', lazy='dynamic')
-    comentarios = db.relationship('Comment', backref='users', lazy='dynamic')
+    posts = db.relationship('Post', cascade='all, delete-orphan', back_populates='user')
+    comments = db.relationship('Comment', cascade='all, delete-orphan', back_populates='user')
 
 
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key= True)
-    name = db.Column(db.String(50), nullable=False)
+    name = db.Column(db.String(50), nullable=False, unique=True)
     description = db.Column(db.String(1000), nullable=False)
     type = db.Column(db.String(15), nullable=False)
     active = db.Column(db.Boolean, nullable=False, default=True)
 
-    posts = db.relationship('Post', backref='courses', lazy='dynamic')
+    posts = db.relationship('Post', secondary=posts_courses, cascade='all, delete', back_populates='courses')
 
 
 class Post(db.Model):
@@ -44,9 +47,12 @@ class Post(db.Model):
     content = db.Column(db.String(300), nullable=False)
     creation_date = db.Column(db.DateTime, nullable=False)
     id_course = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
-    id_mentor = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    id_user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
-    comentarios = db.relationship('Comment', backref='posts', lazy='dynamic')
+    courses = db.relationship('Course', secondary=posts_courses, back_populates='posts')
+    comments = db.relationship('Comment', cascade='all, delete-orphan', backref='posts', lazy='dynamic')
+    user = db.relationship('User', back_populates='posts')
+    
 
 
 class Comment(db.Model):
@@ -55,3 +61,5 @@ class Comment(db.Model):
     creation_date = db.Column(db.DateTime, nullable=False)
     id_post = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
     id_user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    user = db.relationship('User', back_populates='comments')
