@@ -1,10 +1,9 @@
 from datetime import datetime
-from re import T
-from flask import Flask, render_template, url_for, redirect, flash
+from flask import Flask, render_template, url_for, redirect, flash, request
 from sqlalchemy import exists
 from flask_mail import Mail
-from flask_security import login_required, roles_required, current_user, \
-                        SQLAlchemyUserDatastore, Security
+from flask_security import login_required, roles_required, roles_accepted, \
+                        current_user, SQLAlchemyUserDatastore, Security
 from model import db, User, Role, Course, Post, Comment
 from forms import ExtendedRegisterForm, CourseForm, PostForm, CommentForm
 from flask_migrate import Migrate
@@ -288,6 +287,74 @@ def create_app():
                 return redirect(url_for('post', post_id=post_id_int))
     
         return render_template('post.html', current_user=current_user, form=form, post=post_obj)
+    
+    @app.route('/meus_posts', methods=['GET', 'POST'])
+    @roles_required('mentor')
+    def meus_posts():
+        form = CommentForm()
+        posts = Post.query.filter(Post.user.has(User.id == current_user.id))
 
+        if form.validate_on_submit():
+            content = form.content.data
+            post_id_form = form.post_id.data
+            
+            try:
+                post_id = int(post_id_form)
+                # Querying database to check if post exists
+                if 0 < Post.query.filter(Post.id == post_id).count() < 2:
+                    comment = Comment(content=content, creation_date=datetime.now(), id_post=post_id)
+                    # Adding author to comment
+                    comment.user = current_user
+                    db.session.add(comment)
+                    db.session.commit()
+                    return redirect(url_for('meus_posts'))
+                else:
+                    db.session.rollback()
+                    flash('Falha ao fazer comentario!', 'error')
+                    return redirect(url_for('meus_posts'))
+            except:
+                db.session.rollback()
+                flash('Falha ao fazer comentario!', 'error')
+                return redirect(url_for('meus_posts'))
+
+        return render_template('meus_posts.html', current_user=current_user, form=form, posts=posts)
+
+    @app.route('/excluir_post/<post_id>')
+    @roles_accepted('admin', 'mentor')
+    def excluir_post(post_id):
+        post = Post.query.filter(Post.id == post_id).first()
+
+        if current_user.has_role('admin') or current_user.id == post.user.id:
+            try: 
+                db.session.delete(post)
+                db.session.commit()
+                flash('Post removido com sucesso!', 'success')
+            except:
+                db.session.rollback()
+                flash('Falha ao remover post', 'error')
+        else:
+            flash('Voce não tem permissão para deletar esse post', 'error')
+            
+        return redirect(url_for('index'))
+    
+    @app.route('/excluir_comentario/<comment_id>')
+    @roles_accepted('admin', 'mentor')
+    def excluir_comentario(comment_id):
+        comment = Comment.query.filter(Comment.id == comment_id).first()
+        post = Post.query.filter(Post.id == comment.id_post).first()
+
+        # Only the admin and post's creator can remove comments
+        if current_user.has_role('admin') or current_user.id == post.user.id:
+            try: 
+                db.session.delete(comment)
+                db.session.commit()
+                flash('Comentario removido com sucesso!', 'success')
+            except:
+                db.session.rollback()
+                flash('Falha ao remover comentario', 'error')
+        else:
+            flash('Voce não tem permissão para deletar esse comentario', 'error')
+            
+        return redirect(url_for('index'))
 
     return app

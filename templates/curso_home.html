@@ -1,4 +1,4 @@
-{% from "_macros.html" import render_field_with_errors %}
+{% from "_macros.html" import render_field_with_errors, render_post %}
 {% extends "base.html" %}
 
 {% block header %}
@@ -19,29 +19,7 @@
     {% endif %}
     <h2> Posts Recentes</h2>
     {% for post in posts %}
-    <div>
-        <ul>
-            <li> {{ post.user.first_name }} {{ post.user.last_name }} </li>
-            <li> {{ post.creation_date.strftime('%d/%m/%Y %H:%M') }}</li>
-            <li> {{ post.content }}  </li>
-            {% if current_user.is_authenticated  %}
-            <li><a href="{{ url_for('post', post_id=post.id)}}"> Ver detalhes </a></li>
-            <form method="POST" action="{{ url_for('curso_home', course_name=course.name)}}">
-                {{ form_comment.csrf_token }}
-                {{ form_comment.post_id(value=post.id) }}
-                {{ render_field_with_errors(form_comment.content) }}
-                <input type="submit" value="Comentar">
-            </form>
-            {% endif %}
-            <p> Comentarios: </p>
-            <ul>
-                {% for comment in post.comments %}
-                <li> {{ comment.user.first_name }} {{ comment.user.last_name }} ({{ post.creation_date.strftime('%d/%m/%Y %H:%M')}}): {{ comment.content }}</li>
-                {% endfor %}
-            </ul>
-        </ul>
-    </div>
-    <br>
+        {{ render_post(post, form_comment, current_user, 'curso_home', course_name=course.name)}}
     {% endfor %}
     
 {% endblock %}

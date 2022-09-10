@@ -10,3 +10,45 @@
     {% endif %}
   </p>
 {% endmacro %}
+
+{% macro render_post(post, comment_form, current_user, redirect_page) %}
+  <div>
+    <ul>
+        {% if current_user.is_authenticated  %}
+          <li> Opções: <a href="{{ url_for('post', post_id=post.id)}}"> Ver detalhes </a>
+          {% if current_user.has_role('admin') or post.user.id == current_user.id %}
+          <a href="{{ url_for('excluir_post', post_id=post.id)}}"> Remover Post </a>
+          {% endif %}
+          </li>
+        {% endif %}
+      
+        <li> Autor: {{ post.user.first_name }} {{ post.user.last_name }} </li>
+        <li> Data: {{ post.creation_date.strftime('%d/%m/%Y %H:%M') }}</li>
+        <li> Conteudo: {{ post.content }}  </li>
+        
+        {% if current_user.is_authenticated  %}
+          {% if kwargs %}
+            <form method="POST" action="{{ url_for('%s' % redirect_page, **kwargs )}}">
+          {% else %}
+            <form method="POST" action="{{ url_for('%s' % redirect_page) }}">
+          {% endif %}
+              {{ comment_form.csrf_token }}
+              {{ comment_form.post_id(value=post.id) }}
+              {% call render_field_with_errors(comment_form.content) %} {% endcall %}
+              <input type="submit" value="Comentar">
+            </form>
+        {% endif %}
+        <p> Comentarios: </p>
+        <ul>
+            {% for comment in post.comments %}
+            {% if current_user.has_role('admin') or post.user.id == current_user.id %}
+            <li> Opções: <a href="{{ url_for('excluir_comentario', comment_id=comment.id)}}"> Remover </a> </li>
+            {% endif %}
+            <li> {{ comment.user.first_name }} {{ comment.user.last_name }} ({{ comment.creation_date.strftime('%d/%m/%Y %H:%M')}}): {{ comment.content }}</li>
+            <br>
+            {% endfor %}
+        </ul>
+    </ul>
+  </div>
+  <br>
+{% endmacro %}
