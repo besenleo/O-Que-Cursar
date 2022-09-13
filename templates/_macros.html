@@ -52,3 +52,13 @@
   </div>
   <br>
 {% endmacro %}
+
+{% macro render_comment(comment, current_user) %}
+  <ul>
+      {% if current_user.has_role('admin') or comment.id_user == current_user.id %}
+      <li> Opções: <a href="{{ url_for('post', post_id=comment.id_post)}}"> Ver post </a> <a href="{{ url_for('excluir_comentario', comment_id=comment.id)}}"> Remover </a></li>
+      {% endif %}
+      <li> {{ comment.user.first_name }} {{ comment.user.last_name }} ({{ comment.creation_date.strftime('%d/%m/%Y %H:%M')}}): {{ comment.content }}</li>
+      <br>
+  </ul>
+{% endmacro %}

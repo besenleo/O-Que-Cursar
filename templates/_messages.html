@@ -8,6 +8,9 @@
       {% if category == 'success'%}
          <li color="green">{{ message }}</li>
       {% endif %}
+      {% if category == 'info'%}
+         <li color="gray">{{ message }}</li>
+      {% endif %}
   {% endfor %}
   </ul>
 {% endif %}

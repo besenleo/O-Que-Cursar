@@ -5,7 +5,7 @@ from flask_mail import Mail
 from flask_security import login_required, roles_required, roles_accepted, \
                         current_user, SQLAlchemyUserDatastore, Security
 from model import db, User, Role, Course, Post, Comment
-from forms import ExtendedRegisterForm, CourseForm, PostForm, CommentForm
+from forms import ExtendedRegisterForm, CourseForm, PostForm, CommentForm, ProfileForm
 from flask_migrate import Migrate
 
 migrate = Migrate()
@@ -35,19 +35,62 @@ def create_app():
     @app.route('/')
     def index():
         return render_template('index.html', current_user=current_user)
-    
 
-    @app.route('/perfil')
+    #######################
+    # User related routes #
+    #######################    
+
+    @app.route('/perfil', methods=['GET', 'POST'])
     @login_required
     def perfil():
-        return render_template('perfil.html', current_user=current_user) 
+        form = ProfileForm()
+
+        if form.validate_on_submit():
+            first_name = form.first_name.data
+            last_name = form.last_name.data
+            occupation = form.occupation.data
+            change_counter = 0
+            
+            try:
+                # Check if user changed their name
+                if (current_user.first_name != first_name or \
+                    current_user.last_name != last_name) and \
+                    (datetime.now() - current_user.name_change_at).days > 90:
+                    current_user.first_name = first_name
+                    current_user.last_name = last_name
+                    current_user.name_change_at = datetime.now()
+                    change_counter += 1
+                else:
+                    flash('Você só pode trocar de nome 1 vez a cada 90 dias', 'info')
+                # Check if user changed their occupation
+                if current_user.occupation != occupation:
+                    current_user.occupation = occupation
+                    change_counter += 1
+                # Check if information was changed, then commits
+                if change_counter > 0:
+                    db.session.commit()
+                    flash('Dados editado com sucesso!', 'success')
+                else:
+                    flash('Nenhum dado alterado', 'info')                                    
+            except:
+                db.session.rollback()
+                flash('Falha ao editar dados', 'error')
+
+        user_comments = Comment.query.filter(Comment.id_user == current_user.id)
+
+        # Filling the form info
+        form.first_name.data = current_user.first_name
+        form.last_name.data = current_user.last_name
+        form.occupation.data = current_user.occupation
+
+        return render_template('perfil.html', current_user=current_user, comments=user_comments, form=form) 
 
 
     @app.route('/gerenciar_cursos', methods=['GET', 'POST'])
     @roles_required('admin')
     def gerenciar_cursos():
         form = CourseForm()
-        
+
         if form.validate_on_submit():
             nome = form.name.data
             descricao = form.description.data
@@ -67,45 +110,7 @@ def create_app():
         
         courses = Course.query.all()
 
-        return render_template('gerenciar_cursos.html', current_user=current_user, form=form, courses=courses)
-
-
-    @app.route('/editar_cursos/<course_id>', methods=['GET','POST'])
-    @roles_required('admin')
-    def editar_curso(course_id):
-        course = Course.query.filter(Course.id == course_id).first()
-        form = CourseForm(name=course.name, description=course.description, type=course.type)
-        
-        if form.validate_on_submit():
-            try: 
-                course.name = form.name.data
-                course.description = form.description.data
-                course.type = form.type.data
-                db.session.commit()
-                flash('Curso editado com sucesso!', 'success')
-                return redirect(url_for('gerenciar_cursos'))
-            except:
-                db.session.rollback()
-                flash('Falha ao editar curso', 'error')
-                return redirect(url_for('gerenciar_cursos'))
-
-        return render_template('editar_curso.html', current_user=current_user, form=form, course=course)
-
-
-    @app.route('/excluir_cursos/<course_id>')
-    @roles_required('admin')
-    def excluir_curso(course_id):
-        course = Course.query.filter(Course.id == course_id).first()
-        try: 
-            db.session.delete(course)
-            db.session.commit()
-            flash('Curso removido com sucesso!', 'success')
-        except:
-            db.session.rollback()
-            flash('Falha ao remover curso', 'error')
-
-        return redirect(url_for('gerenciar_cursos'))
-    
+        return render_template('gerenciar_cursos.html', current_user=current_user, form=form, courses=courses)    
 
     @app.route('/gerenciar_usuarios')
     @roles_required('admin')
@@ -157,12 +162,54 @@ def create_app():
 
         return redirect(url_for('gerenciar_usuarios'))
 
+    #########################
+    # Course related routes #
+    #########################
 
     @app.route('/cursos')
     def cursos():
         courses = Course.query.all()
         return render_template('cursos.html', current_user=current_user, courses=courses)
     
+    @app.route('/editar_cursos/<course_id>', methods=['GET','POST'])
+    @roles_required('admin')
+    def editar_curso(course_id):
+        course = Course.query.filter(Course.id == course_id).first()
+        form = CourseForm(name=course.name, description=course.description, type=course.type)
+        
+        if form.validate_on_submit():
+            try: 
+                course.name = form.name.data
+                course.description = form.description.data
+                course.type = form.type.data
+                db.session.commit()
+                flash('Curso editado com sucesso!', 'success')
+                return redirect(url_for('gerenciar_cursos'))
+            except:
+                db.session.rollback()
+                flash('Falha ao editar curso', 'error')
+                return redirect(url_for('gerenciar_cursos'))
+
+        return render_template('editar_curso.html', current_user=current_user, form=form, course=course)
+
+
+    @app.route('/excluir_cursos/<course_id>')
+    @roles_required('admin')
+    def excluir_curso(course_id):
+        course = Course.query.filter(Course.id == course_id).first()
+        try: 
+            db.session.delete(course)
+            db.session.commit()
+            flash('Curso removido com sucesso!', 'success')
+        except:
+            db.session.rollback()
+            flash('Falha ao remover curso', 'error')
+
+        return redirect(url_for('gerenciar_cursos'))
+
+    #######################
+    # Post related routes #
+    #######################
 
     @app.route('/cursos/<course_name>', methods=['GET', 'POST'])
     def curso_home(course_name):

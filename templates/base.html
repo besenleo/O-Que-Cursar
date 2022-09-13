@@ -11,6 +11,7 @@
 <body>
     <h2> Menu </h2>
     <ul>
+        <li><a href="{{ url_for('index') }}">Home</a></li>
         <li><a href="{{ url_for('cursos') }}">Cursos</a></li>
         {% if not current_user.is_authenticated %}
         <li><a href="{{ url_for_security('login') }}">Login</a></li>

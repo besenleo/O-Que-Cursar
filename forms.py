@@ -14,6 +14,20 @@ class ExtendedRegisterForm(ConfirmRegisterForm):
         Length(min=3, max=30)
     ])
 
+class ProfileForm(FlaskForm):
+    first_name = StringField('Nome', validators=[
+        InputRequired(),
+        Length(min=3, max=30)
+    ])
+    last_name = StringField('Sobrenome', validators=[
+        InputRequired(),
+        Length(min=3, max=30)
+    ])
+    occupation = StringField('Ocupação', validators=[
+        InputRequired(),
+        Length(min=3, max=50)
+    ])
+
 class CourseForm(FlaskForm):
     name = StringField('Nome', validators=[
         InputRequired(),
