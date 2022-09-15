@@ -1,7 +1,5 @@
 from datetime import datetime
-from email.mime import image
-from flask import Flask, render_template, url_for, redirect, flash, request
-from sqlalchemy import exists
+from flask import Flask, render_template, url_for, redirect, flash
 from flask_mail import Mail
 from flask_security import login_required, roles_required, roles_accepted, \
                         current_user, SQLAlchemyUserDatastore, Security
@@ -247,7 +245,7 @@ def create_app():
                 if post_image:
                     image_filename = photos.save(post_image)
                     image_url = photos.url(image_filename)
-                    post = Post(content=content, creation_date=datetime.now(), user=current_user, image=image_url)  
+                    post = Post(content=content, creation_date=datetime.now(), user=current_user, image=image_url) 
                 else:
                     post = Post(content=content, creation_date=datetime.now(), user=current_user)            
                 # Adding the courses to post
@@ -318,7 +316,6 @@ def create_app():
                             post.courses.append(course)
                 db.session.add(post)
                 db.session.commit()
-                print(post.courses)
                 flash('Post criado com sucesso!', 'success')
                 return redirect(url_for('criar_post'))
             except:
