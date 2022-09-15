@@ -25,6 +25,9 @@ class User(db.Model, UserMixin):
     confirmed_at = db.Column(db.DateTime())
     first_name = db.Column(db.String(50))
     last_name = db.Column(db.String(50))
+    occupation = db.Column(db.String(50))
+    name_change_at = db.Column(db.DateTime())
+    profile_picture = db.Column(db.String(50))
 
     roles = db.relationship('Role', secondary=roles_users, 
                             backref=db.backref('users', lazy='dynamic'))
@@ -46,6 +49,7 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key= True)
     content = db.Column(db.String(300), nullable=False)
     creation_date = db.Column(db.DateTime, nullable=False)
+    image = db.Column(db.String(50))
     id_user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     courses = db.relationship('Course', secondary=posts_courses, back_populates='posts')

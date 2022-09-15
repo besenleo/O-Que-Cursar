@@ -1,0 +1,14 @@
+{% from "_macros.html" import render_field_with_errors, render_post %}
+{% extends "base.html" %}
+
+{% block header %}
+{% block title %} Minhas Postagens {% endblock %}
+{% endblock %}
+
+{% block body %}
+    {% include "_messages.html" %}
+    <h2> Minhas Postagens</h2>
+    {% for post in posts %}
+        {{ render_post(post, form, current_user, 'meus_posts') }}
+    {% endfor %}
+{% endblock %}
