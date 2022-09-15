@@ -27,6 +27,7 @@ class User(db.Model, UserMixin):
     last_name = db.Column(db.String(50))
     occupation = db.Column(db.String(50))
     name_change_at = db.Column(db.DateTime())
+    profile_picture = db.Column(db.String(255))
 
     roles = db.relationship('Role', secondary=roles_users, 
                             backref=db.backref('users', lazy='dynamic'))

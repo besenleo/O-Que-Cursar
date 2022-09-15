@@ -1,7 +1,8 @@
 from flask_security import ConfirmRegisterForm
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, TextAreaField, HiddenField, SelectMultipleField
-from wtforms.validators import InputRequired, Length, NumberRange
+from flask_wtf.file import FileField, FileAllowed, FileSize
+from wtforms.validators import InputRequired, Length
 
 
 class ExtendedRegisterForm(ConfirmRegisterForm):
@@ -26,6 +27,10 @@ class ProfileForm(FlaskForm):
     occupation = StringField('Ocupação', validators=[
         InputRequired(),
         Length(min=3, max=50)
+    ])
+    photo = FileField('Foto', validators=[
+        FileAllowed(['jpg', 'png', 'jpeg'], 'Imagens são permitidas em formato .jpg, .png e .jpeg'),
+        FileSize(max_size=10485760)
     ])
 
 class CourseForm(FlaskForm):

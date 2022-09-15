@@ -7,6 +7,8 @@ from flask_security import login_required, roles_required, roles_accepted, \
 from model import db, User, Role, Course, Post, Comment
 from forms import ExtendedRegisterForm, CourseForm, PostForm, CommentForm, ProfileForm
 from flask_migrate import Migrate
+from flask_uploads import UploadSet, configure_uploads, IMAGES
+import os
 
 migrate = Migrate()
 
@@ -31,6 +33,10 @@ def create_app():
     security = Security(app, user_datastore, 
                         confirm_register_form=ExtendedRegisterForm) # Instancing Flask-Security
 
+    # Defining a upload set to handle pictures and videos
+    photos = UploadSet('photos', IMAGES)
+    configure_uploads(app, photos)
+
     # Defining routes
     @app.route('/')
     def index():
@@ -49,19 +55,27 @@ def create_app():
             first_name = form.first_name.data
             last_name = form.last_name.data
             occupation = form.occupation.data
+            profile_picture = form.photo.data
             change_counter = 0
             
             try:
+                if profile_picture:
+                    # TODO: remove old profile picture
+                    image_filename = photos.save(profile_picture)
+                    current_user.profile_picture = image_filename
+                    change_counter += 1
                 # Check if user changed their name
                 if (current_user.first_name != first_name or \
+                    current_user.last_name != last_name) and \
+                    (datetime.now() - current_user.name_change_at).days < 90:
+                    flash('Você só pode trocar de nome 1 vez a cada 90 dias', 'info')
+                elif (current_user.first_name != first_name or \
                     current_user.last_name != last_name) and \
                     (datetime.now() - current_user.name_change_at).days > 90:
                     current_user.first_name = first_name
                     current_user.last_name = last_name
                     current_user.name_change_at = datetime.now()
-                    change_counter += 1
-                else:
-                    flash('Você só pode trocar de nome 1 vez a cada 90 dias', 'info')
+                    change_counter += 1  
                 # Check if user changed their occupation
                 if current_user.occupation != occupation:
                     current_user.occupation = occupation
@@ -78,39 +92,13 @@ def create_app():
 
         user_comments = Comment.query.filter(Comment.id_user == current_user.id)
 
+        # TODO: Show user their profile picture
         # Filling the form info
         form.first_name.data = current_user.first_name
         form.last_name.data = current_user.last_name
         form.occupation.data = current_user.occupation
-
-        return render_template('perfil.html', current_user=current_user, comments=user_comments, form=form) 
-
-
-    @app.route('/gerenciar_cursos', methods=['GET', 'POST'])
-    @roles_required('admin')
-    def gerenciar_cursos():
-        form = CourseForm()
-
-        if form.validate_on_submit():
-            nome = form.name.data
-            descricao = form.description.data
-            tipo = form.type.data
-
-            course = Course(name=nome, description=descricao, type=tipo)
-
-            try: 
-                db.session.add(course)
-                db.session.commit()
-                flash('Curso adicionado com sucesso!', 'success')
-                return redirect(url_for('gerenciar_cursos'))
-            except:
-                db.session.rollback()
-                flash('Falha ao adicionar curso', 'error')
-                return redirect(url_for('gerenciar_cursos'))
         
-        courses = Course.query.all()
-
-        return render_template('gerenciar_cursos.html', current_user=current_user, form=form, courses=courses)    
+        return render_template('perfil.html', current_user=current_user, comments=user_comments, form=form)  
 
     @app.route('/gerenciar_usuarios')
     @roles_required('admin')
@@ -171,6 +159,32 @@ def create_app():
         courses = Course.query.all()
         return render_template('cursos.html', current_user=current_user, courses=courses)
     
+    @app.route('/gerenciar_cursos', methods=['GET', 'POST'])
+    @roles_required('admin')
+    def gerenciar_cursos():
+        form = CourseForm()
+
+        if form.validate_on_submit():
+            nome = form.name.data
+            descricao = form.description.data
+            tipo = form.type.data
+
+            course = Course(name=nome, description=descricao, type=tipo)
+
+            try: 
+                db.session.add(course)
+                db.session.commit()
+                flash('Curso adicionado com sucesso!', 'success')
+                return redirect(url_for('gerenciar_cursos'))
+            except:
+                db.session.rollback()
+                flash('Falha ao adicionar curso', 'error')
+                return redirect(url_for('gerenciar_cursos'))
+        
+        courses = Course.query.all()
+
+        return render_template('gerenciar_cursos.html', current_user=current_user, form=form, courses=courses)   
+    
     @app.route('/editar_cursos/<course_id>', methods=['GET','POST'])
     @roles_required('admin')
     def editar_curso(course_id):
@@ -227,10 +241,8 @@ def create_app():
             content = form_post.content.data
             courses_form = form_post.courses.data
             
-            print(courses_form)
-
             try: 
-                post = Post(content=content, creation_date=datetime.now(), user = current_user)            
+                post = Post(content=content, creation_date=datetime.now(), user=current_user)            
                 # Adding the courses to post
                 for course_form in courses_form:
                     for course in courses:
@@ -309,7 +321,7 @@ def create_app():
         form = CommentForm()
 
         post_obj = Post.query.filter(Post.id == post_id).first()
-
+        # Comment form action
         if form.validate_on_submit():
             content = form.content.data
             post_id_form = form.post_id.data
@@ -340,7 +352,7 @@ def create_app():
     def meus_posts():
         form = CommentForm()
         posts = Post.query.filter(Post.user.has(User.id == current_user.id))
-
+        # Comment form action
         if form.validate_on_submit():
             content = form.content.data
             post_id_form = form.post_id.data

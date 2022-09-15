@@ -9,11 +9,12 @@
   <h1> Olá, {{ current_user.first_name }} {{ current_user.last_name }}</h1>
   {% include "_messages.html" %}
   <h2> Seus dados </h2>
-  <form method="POST" action="{{ url_for('perfil')}}">
+  <form method="POST" action="{{ url_for('perfil')}}" enctype="multipart/form-data">
     {{ form.csrf_token }}
     {{ render_field_with_errors(form.first_name) }}
     {{ render_field_with_errors(form.last_name) }}
     {{ render_field_with_errors(form.occupation) }}
+    {{ render_field_with_errors(form.photo) }}
     <input type="submit" value="Editar Dados">
   </form>
   <h2> Meus comentarios </h2>
