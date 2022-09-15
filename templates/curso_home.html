@@ -10,9 +10,10 @@
     {% include "_messages.html" %}
     {% if current_user.is_authenticated and current_user.has_role('mentor') %}
     <h2> Criar Post </h2>
-    <form method="POST" action="{{ url_for('curso_home', course_name=course.name)}}">
+    <form method="POST" action="{{ url_for('curso_home', course_name=course.name)}}" enctype="multipart/form-data">
         {{ form_post.csrf_token }}
         {{ render_field_with_errors(form_post.content) }}
+        {{ render_field_with_errors(form.image) }}
         <input type="submit" value="Postar">
     </form>
     <br>

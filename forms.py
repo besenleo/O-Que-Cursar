@@ -54,6 +54,10 @@ class PostForm(FlaskForm):
         Length(max=300)
     ])
     courses = SelectMultipleField('Cursos', validators=[InputRequired()])
+    image = FileField('Imagem', validators=[
+        FileAllowed(['jpg', 'png', 'jpeg'], 'Apenas imagens em formato .jpg, .png e .jpeg são permitidas'),
+        FileSize(max_size=10485760)
+    ])
 
 
 class CommentForm(FlaskForm):

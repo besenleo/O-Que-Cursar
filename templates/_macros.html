@@ -25,6 +25,9 @@
         <li> Autor: {{ post.user.first_name }} {{ post.user.last_name }} </li>
         <li> Data: {{ post.creation_date.strftime('%d/%m/%Y %H:%M') }}</li>
         <li> Conteudo: {{ post.content }}  </li>
+        {% if post.image %}
+          <img src="{{ post.image }}" style="height: 200px; width: 100px;" />
+        {% endif %}
         
         {% if current_user.is_authenticated  %}
           {% if kwargs %}

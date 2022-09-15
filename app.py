@@ -1,4 +1,5 @@
 from datetime import datetime
+from email.mime import image
 from flask import Flask, render_template, url_for, redirect, flash, request
 from sqlalchemy import exists
 from flask_mail import Mail
@@ -62,7 +63,8 @@ def create_app():
                 if profile_picture:
                     # TODO: remove old profile picture
                     image_filename = photos.save(profile_picture)
-                    current_user.profile_picture = image_filename
+                    image_url = photos.url(image_filename)
+                    current_user.profile_picture = image_url
                     change_counter += 1
                 # Check if user changed their name
                 if (current_user.first_name != first_name or \
@@ -92,7 +94,6 @@ def create_app():
 
         user_comments = Comment.query.filter(Comment.id_user == current_user.id)
 
-        # TODO: Show user their profile picture
         # Filling the form info
         form.first_name.data = current_user.first_name
         form.last_name.data = current_user.last_name
@@ -240,9 +241,15 @@ def create_app():
         if form_post.validate_on_submit():
             content = form_post.content.data
             courses_form = form_post.courses.data
+            post_image = form_post.image.data
             
             try: 
-                post = Post(content=content, creation_date=datetime.now(), user=current_user)            
+                if post_image:
+                    image_filename = photos.save(post_image)
+                    image_url = photos.url(image_filename)
+                    post = Post(content=content, creation_date=datetime.now(), user=current_user, image=image_url)  
+                else:
+                    post = Post(content=content, creation_date=datetime.now(), user=current_user)            
                 # Adding the courses to post
                 for course_form in courses_form:
                     for course in courses:
@@ -250,7 +257,6 @@ def create_app():
                             post.courses.append(course)
                 db.session.add(post)
                 db.session.commit()
-                print(post.courses)
                 return redirect(url_for('curso_home', course_name=course.name))
             except:
                 db.session.rollback()
@@ -296,9 +302,15 @@ def create_app():
         if form.validate_on_submit():
             content = form.content.data
             courses_form = form.courses.data
-
+            post_image = form.image.data
+            
             try: 
-                post = Post(content=content, creation_date=datetime.now(), user = current_user)            
+                if post_image:
+                    image_filename = photos.save(post_image)
+                    image_url = photos.url(image_filename)
+                    post = Post(content=content, creation_date=datetime.now(), user=current_user, image=image_url) 
+                else:
+                    post = Post(content=content, creation_date=datetime.now(), user=current_user)           
                 # Adding the courses to post
                 for course_form in courses_form:
                     for course in courses:

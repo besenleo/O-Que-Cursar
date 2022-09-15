@@ -6,6 +6,7 @@
 {% endblock %}
 
 {% block body %}
+  <img src="{{ current_user.profile_picture }}" alt="Profile-Picture" style="width: 100px; height:100px;"/>
   <h1> Olá, {{ current_user.first_name }} {{ current_user.last_name }}</h1>
   {% include "_messages.html" %}
   <h2> Seus dados </h2>
