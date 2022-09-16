@@ -64,23 +64,27 @@ def create_app():
                     image_url = photos.url(image_filename)
                     current_user.profile_picture = image_url
                     change_counter += 1
-                # Check if user changed their name
-                if (current_user.first_name != first_name or \
-                    current_user.last_name != last_name) and \
-                    (datetime.now() - current_user.name_change_at).days < 90:
-                    flash('Você só pode trocar de nome 1 vez a cada 90 dias', 'info')
-                elif (current_user.first_name != first_name or \
-                    current_user.last_name != last_name) and \
-                    (datetime.now() - current_user.name_change_at).days > 90:
-                    current_user.first_name = first_name
-                    current_user.last_name = last_name
-                    current_user.name_change_at = datetime.now()
-                    change_counter += 1  
-                # Check if user changed their occupation
+                # Check if user changed their name on the form
+                if current_user.first_name != first_name or current_user.last_name != last_name:
+                    # Check if it is the user first time changing their name
+                    if not current_user.name_change_at:
+                        current_user.first_name = first_name
+                        current_user.last_name = last_name
+                        current_user.name_change_at = datetime.now()
+                        change_counter += 1  
+                    # Check if user changed their name on the last 90 days
+                    elif (datetime.now() - current_user.name_change_at).days < 90:
+                        flash('Você só pode trocar de nome 1 vez a cada 90 dias', 'info')
+                    else:
+                        current_user.first_name = first_name
+                        current_user.last_name = last_name
+                        current_user.name_change_at = datetime.now()
+                        change_counter += 1  
+                # Check if user changed their occupation on the form
                 if current_user.occupation != occupation:
                     current_user.occupation = occupation
                     change_counter += 1
-                # Check if information was changed, then commits
+                # Check if any information was changed based on the previous form, then commits
                 if change_counter > 0:
                     db.session.commit()
                     flash('Dados editado com sucesso!', 'success')
@@ -148,6 +152,23 @@ def create_app():
                 flash(f'Não foi possivel remover permissão!')
 
         return redirect(url_for('gerenciar_usuarios'))
+    
+    @app.route('/deletar_conta/<user_id>')
+    @login_required
+    def deletar_conta(user_id):
+        if current_user.has_role('admin') or current_user.id == user_id:
+            user = User.query.filter(User.id == user_id).first()
+            try: 
+                db.session.delete(user)
+                db.session.commit()
+                flash('Usuario removido!', 'success')
+            except:
+                db.session.rollback()
+                flash('Falha ao remover usuario', 'error')
+        else:
+            flash('Voce nao tem permissão para realizar essa operação!', 'error')
+        
+        return redirect(url_for('index'))
 
     #########################
     # Course related routes #

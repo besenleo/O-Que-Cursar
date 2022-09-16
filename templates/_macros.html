@@ -12,6 +12,7 @@
 {% endmacro %}
 
 {% macro render_post(post, comment_form, current_user, redirect_page) %}
+  {% if post %} 
   <div>
     <ul>
         {% if current_user.is_authenticated  %}
@@ -54,6 +55,7 @@
     </ul>
   </div>
   <br>
+  {% endif %}
 {% endmacro %}
 
 {% macro render_comment(comment, current_user) %}

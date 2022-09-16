@@ -26,6 +26,7 @@
             {% if user.has_role('mentor')%}
             <a href="{{ url_for('rebaixar_usuario', user_id=user.id, role='mentor') }}"> - Remover Mentor </a>
             {% endif %}
+            <a href="{{ url_for('deletar_conta', user_id=user.id) }}"> - Deletar Usuario </a>
         </li>
     {% endfor %}
     </ul>
