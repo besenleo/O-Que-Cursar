@@ -6,7 +6,9 @@
 {% endblock %}
 
 {% block body %}
-  <img src="{{ current_user.profile_picture }}" alt="Profile-Picture" style="width: 100px; height:100px;"/>
+  {% if current_user.profile_picture %}
+    <img src="{{ current_user.profile_picture }}" style="width: 100px; height:100px;"/>
+  {% endif %} 
   <h1> Olá, {{ current_user.first_name }} {{ current_user.last_name }}</h1>
   {% include "_messages.html" %}
   <h2> Seus dados </h2>
@@ -27,5 +29,6 @@
     {% if security.recoverable %}
     <li><a href="{{ url_for_security('forgot_password') }}">Mudar senha</a><br/></li>
     {% endif %}
+    <li><a href="{{ url_for('deletar_conta', user_id=current_user.id) }}">Deletar minha conta</a><br/></li>
   </ul>
 {% endblock %}
