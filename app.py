@@ -7,7 +7,6 @@ from model import db, User, Role, Course, Post, Comment
 from forms import ExtendedRegisterForm, CourseForm, PostForm, CommentForm, ProfileForm
 from flask_migrate import Migrate
 from flask_uploads import UploadSet, configure_uploads, IMAGES
-import os
 
 migrate = Migrate()
 
@@ -157,8 +156,8 @@ def create_app():
     @login_required
     def deletar_conta(user_id):
         if current_user.has_role('admin') or current_user.id == user_id:
-            user = User.query.filter(User.id == user_id).first()
             try: 
+                user = User.query.filter(User.id == user_id).first()
                 db.session.delete(user)
                 db.session.commit()
                 flash('Usuario removido!', 'success')
@@ -167,6 +166,45 @@ def create_app():
                 flash('Falha ao remover usuario', 'error')
         else:
             flash('Voce nao tem permissão para realizar essa operação!', 'error')
+        
+        return redirect(url_for('index'))
+    
+    @app.route('/desativar_conta/<user_id>')
+    @roles_required('admin')
+    def desativar_conta(user_id):
+        try: 
+            # Query and disable user
+            user = User.query.filter(User.id == user_id).first()
+            user.active = False
+            # Query and delete all user's comments
+            user_comments = Comment.query.filter(Comment.id_user == user.id).all()
+            for comment in user_comments:
+                db.session.delete(comment)
+            # Query and delete all user's posts
+            user_posts = Post.query.filter(Post.id_user == user.id).all()
+            for post in user_posts:
+                db.session.delete(post)
+            # Commit changes to database
+            db.session.commit()
+            flash('Usuario desativado!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Falha ao desativadar usuario {e}', 'error')
+        
+        return redirect(url_for('index'))
+    
+    @app.route('/reativar_conta/<user_id>')
+    @roles_required('admin')
+    def reativar_conta(user_id):
+        try: 
+            # Query and disable user
+            user = User.query.filter(User.id == user_id).first()
+            user.active = True
+            db.session.commit()
+            flash('Usuario reativado!', 'success')
+        except:
+            db.session.rollback()
+            flash('Falha ao reativar usuario', 'error')
         
         return redirect(url_for('index'))
 
