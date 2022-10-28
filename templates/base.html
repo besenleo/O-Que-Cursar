@@ -9,6 +9,28 @@
     {% endblock %}
 </head>
 <body>
+    <h2> Menu </h2>
+    <ul>
+        <li><a href="{{ url_for('index') }}">Home</a></li>
+        <li><a href="{{ url_for('cursos') }}">Cursos</a></li>
+        {% if not current_user.is_authenticated %}
+        <li><a href="{{ url_for_security('login') }}">Login</a></li>
+        <li><a href="{{ url_for_security('register') }}">Register</a><br/></li>
+        {% endif %}
+        {% if current_user.is_authenticated and current_user.has_role('mentor') %}
+        <li><a href="{{ url_for('criar_post') }}">Criar Post</a><br/></li>
+        <li><a href="{{ url_for('meus_posts') }}">Minhas Postagens</a><br/></li>
+        {% endif %}
+        {% if current_user.is_authenticated and current_user.has_role('admin') %}
+        <li><a href="{{ url_for('gerenciar_cursos') }}">Gerenciar Cursos</a><br/></li>
+        <li><a href="{{ url_for('gerenciar_usuarios') }}">Gerenciar Permissões de Usuarios</a><br/></li>
+        {% endif %}
+        {% if current_user.is_authenticated %}
+        <li><a href="{{ url_for('perfil') }}">Perfil</a></li>
+        <li><a href="{{ url_for_security('logout') }}">Logout</a><br/></li>
+        {% endif %}
+      </ul>
+
     {% block body %}
 
     {% endblock %}

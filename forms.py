@@ -1,6 +1,7 @@
 from flask_security import ConfirmRegisterForm
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField
+from wtforms import StringField, SelectField, TextAreaField, HiddenField, SelectMultipleField
+from flask_wtf.file import FileField, FileAllowed, FileSize
 from wtforms.validators import InputRequired, Length
 
 
@@ -14,31 +15,57 @@ class ExtendedRegisterForm(ConfirmRegisterForm):
         Length(min=3, max=30)
     ])
 
+class ProfileForm(FlaskForm):
+    first_name = StringField('Nome', validators=[
+        InputRequired(),
+        Length(min=3, max=30)
+    ])
+    last_name = StringField('Sobrenome', validators=[
+        InputRequired(),
+        Length(min=3, max=30)
+    ])
+    occupation = StringField('Ocupação', validators=[
+        InputRequired(),
+        Length(min=3, max=50)
+    ])
+    photo = FileField('Foto', validators=[
+        FileAllowed(['jpg', 'png', 'jpeg'], 'Imagens são permitidas em formato .jpg, .png e .jpeg'),
+        FileSize(max_size=10485760)
+    ])
+
 class CourseForm(FlaskForm):
     name = StringField('Nome', validators=[
         InputRequired(),
         Length(min=3, max=50)
     ])
-    description = StringField('Descrição', validators=[
+    description = TextAreaField('Descrição', validators=[
         InputRequired(),
-        Length(max=300)
+        Length(max=1000)
     ])
     type = SelectField('Tipo do Curso', choices=[
-        ('Licenciatura', 'Licenciatura'), 
-        ('Graduação', 'Graduação'), 
+        ('Graduação', 'Graduação'),
+        ('Licenciatura', 'Licenciatura'),  
         ('Pós-Graduação', 'Pós-Graduação')], validators=[InputRequired()])
 
 
 class PostForm(FlaskForm):
-    content = StringField('Conteudo', validators=[
+    content = TextAreaField('Conteudo', validators=[
         InputRequired(),
         Length(max=300)
     ])
-    #TODO: curso, Provavelmente um SelectField dinamico que passa o objeto do DB?
+    courses = SelectMultipleField('Cursos', validators=[InputRequired()])
+    image = FileField('Imagem', validators=[
+        FileAllowed(['jpg', 'png', 'jpeg'], 'Apenas imagens em formato .jpg, .png e .jpeg são permitidas'),
+        FileSize(max_size=10485760)
+    ])
+
 
 class CommentForm(FlaskForm):
-    content = StringField('Conteudo', validators=[
+    content = TextAreaField('Comentario', validators=[
         InputRequired(),
         Length(max=300)
+    ])
+    post_id = HiddenField('Post_id', validators=[
+        InputRequired()
     ])
  

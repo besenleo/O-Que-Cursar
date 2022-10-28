@@ -1,0 +1,19 @@
+{% from "_macros.html" import render_field_with_errors %}
+{% extends "base.html" %}
+
+{% block header %}
+{% block title %} Criar Post {% endblock %}
+{% endblock %}
+
+{% block body %}
+    <h1> Criar Post </h1>
+    {% include "_messages.html" %}
+    <form method="POST" action="{{ url_for('criar_post')}}" enctype="multipart/form-data">
+        {{ form.csrf_token }}
+        {{ render_field_with_errors(form.courses) }}
+        {{ render_field_with_errors(form.content) }}
+        {{ render_field_with_errors(form.image) }}
+        <input type="submit" value="Postar">
+    </form>
+    <br>
+{% endblock %}

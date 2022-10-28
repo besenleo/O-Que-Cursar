@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "_macros.html" import render_field_with_errors, render_comment %}
+
+{% block header %}
+{% block title %} Perfil {% endblock %}
+{% endblock %}
+
+{% block body %}
+  {% if current_user.profile_picture %}
+    <img src="{{ current_user.profile_picture }}" style="width: 100px; height:100px;"/>
+  {% endif %} 
+  <h1> Olá, {{ current_user.first_name }} {{ current_user.last_name }}</h1>
+  {% include "_messages.html" %}
+  <h2> Seus dados </h2>
+  <form method="POST" action="{{ url_for('perfil')}}" enctype="multipart/form-data">
+    {{ form.csrf_token }}
+    {{ render_field_with_errors(form.first_name) }}
+    {{ render_field_with_errors(form.last_name) }}
+    {{ render_field_with_errors(form.occupation) }}
+    {{ render_field_with_errors(form.photo) }}
+    <input type="submit" value="Editar Dados">
+  </form>
+  <h2> Meus comentarios </h2>
+  {% for comment in comments %}
+    {{ render_comment(comment, current_user) }}
+  {% endfor %}
+  <h2> Segurança </h2>
+  <ul>
+    {% if security.recoverable %}
+    <li><a href="{{ url_for_security('forgot_password') }}">Mudar senha</a><br/></li>
+    {% endif %}
+    <li><a href="{{ url_for('deletar_conta', user_id=current_user.id) }}">Deletar minha conta</a><br/></li>
+  </ul>
+{% endblock %}
