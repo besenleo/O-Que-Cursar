@@ -71,6 +71,8 @@ SECURITY_CHANGEABLE=True
 SECURITY_CONFIRMABLE=True
 SECURITY_SEND_REGISTER_EMAIL=True
 SECURITY_EMAIL_SENDER='no-reply@oquecursar.com'
+UPLOADED_PHOTOS_DEST='pictures'
+UPLOADED_PHOTOS_DENY=['gif','bmp','svg']
 ```
 
 - mail_config.cfg
