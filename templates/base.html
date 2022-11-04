@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"></html>
 <head>
     {% block head %}
     <meta charset="UTF-8">
@@ -8,31 +8,209 @@
     <title>{% block title %} {% endblock %}</title>
     {% endblock %}
 </head>
+
+<style>
+.topo-total {
+    background: #075ebd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+            }
+
+.topo-total h2 {
+    font: 40px 'calibri';
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+ul {
+    display: flex;
+    margin: 20px;
+    height: 100px;
+}
+
+li {
+    align-content: space-around;
+    width: 110px;
+    color: #fff;
+    list-style-type: none;
+    align-self: center;
+    margin: 20px;
+    text-align: center;
+    padding: 5px;
+}
+
+.topo-total li a {
+    color: #fff;
+    font: 20px 'calibri';
+    text-decoration-line: none;
+    font-weight: 600;
+}
+
+
+
+a:hover {transition: 0.7s;
+color: #fff100 !important;
+font-size: 22px !important;
+}
+
+.conteudo-page {
+    margin: 0 auto;
+    width: 1200px;
+}
+
+.conteudo-page h1 {
+    text-align: center;
+    font: 36px Rubik,Raleway,sans-serif!important;
+    color: #fff;
+    font-weight: 700 !important;
+    background: #07366a;
+    height: 40px;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+form {}
+
+.box-01 h2 {
+    font: 30px Rubik,Raleway,sans-serif!important;
+    font-weight: 600 !important;
+    color: #07366a;
+}
+
+.box-01 {
+    text-align: center;
+    padding: 10px;
+    height: 470px;
+    border: solid 3px #07366a;
+    border-radius: 20px;
+}
+
+.box-01 form label {
+    font: 20px 'calibri';
+    margin: 10px;
+    color: #000000;
+    padding: 5px;
+    line-height: 30px;
+    width: 130px;
+    font-weight: bold;
+}
+
+.box-01 form p {display: flex;align-items: center;justify-content: center;}
+
+input#name {
+    width: 200px;
+    height: 20px;
+    border: solid 2px #07366a;
+    border-radius: 5px;
+}
+
+textarea#description {
+    width: 200px;
+    height: 80px;
+    border: solid 2px #07366a;
+    border-radius: 5px;
+}
+
+select#type {
+    width: 150px;
+    height: 30px;
+    font-size: 18px;
+    font-family: calibri;
+    border: solid 2px #07366a;
+    border-radius: 5px;
+}
+
+input[type="submit"] {
+    color: #ffffff;
+    margin: 20px;
+    height: 50px;
+    width: 180px;
+    font: 20px 'calibri';
+    font-weight: bold;
+    border-radius: 20px;
+    background: #07366a;
+    border: solid;
+    padding: 0;
+    cursor: pointer;
+}
+
+input[type="submit"]:hover {
+    width: 185px;
+    height: 50px;
+    font-size: 21px;
+    transition: 0.6s;
+    background: #fff;
+    color: #07366a;
+}
+
+.box-02 h2 {
+    text-align: center;
+    font: 36px Rubik,Raleway,sans-serif!important;
+    color: #fff;
+    font-weight: 700 !important;
+    background: #07366a;
+    height: 40px;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.box-02 li {
+    background: radial-gradient(circle,#3292f9 0,#0e72dd 100%)!important;
+    width: 185px;
+    height: 110px;
+    display: flex;
+    flex-wrap: wrap;
+    border-radius: 5px;
+    color: #fff;
+    font: 20px 'calibri';
+    justify-content: center;
+    font-weight: bold;
+}
+
+.box-02 a {
+    margin: 5px;
+    width: 75px;
+    text-decoration-line: none;
+    font-weight: 500;
+    color: #fff;
+}
+
+.box-02 li:hover {
+    transition: 0.5s;
+    width: 195px;
+    height: 115px;
+    font-size: 22px;
+}
+</style>
+
 <body>
-    <h2> Menu </h2>
-    <ul>
-        <li><a href="{{ url_for('index') }}">Home</a></li>
-        <li><a href="{{ url_for('cursos') }}">Cursos</a></li>
-        {% if not current_user.is_authenticated %}
-        <li><a href="{{ url_for_security('login') }}">Login</a></li>
-        <li><a href="{{ url_for_security('register') }}">Register</a><br/></li>
-        {% endif %}
-        {% if current_user.is_authenticated and current_user.has_role('mentor') %}
-        <li><a href="{{ url_for('criar_post') }}">Criar Post</a><br/></li>
-        <li><a href="{{ url_for('meus_posts') }}">Minhas Postagens</a><br/></li>
-        {% endif %}
-        {% if current_user.is_authenticated and current_user.has_role('admin') %}
-        <li><a href="{{ url_for('gerenciar_cursos') }}">Gerenciar Cursos</a><br/></li>
-        <li><a href="{{ url_for('gerenciar_usuarios') }}">Gerenciar Permissões de Usuarios</a><br/></li>
-        {% endif %}
-        {% if current_user.is_authenticated %}
-        <li><a href="{{ url_for('perfil') }}">Perfil</a></li>
-        <li><a href="{{ url_for_security('logout') }}">Logout</a><br/></li>
-        {% endif %}
-      </ul>
+        <div class="topo-total">
+            <h2> Menu </h2>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('cursos') }}">Cursos</a></li>
+                {% if not current_user.is_authenticated %}
+                <li><a href="{{ url_for_security('login') }}">Login</a></li>
+                <li><a href="{{ url_for_security('register') }}">Register</a><br/></li>
+                {% endif %}
+                {% if current_user.is_authenticated and current_user.has_role('mentor') %}
+                <li><a href="{{ url_for('criar_post') }}">Criar Post</a><br/></li>
+                <li><a href="{{ url_for('meus_posts') }}">Minhas Postagens</a><br/></li>
+                {% endif %}
+                {% if current_user.is_authenticated and current_user.has_role('admin') %}
+                <li><a href="{{ url_for('gerenciar_cursos') }}">Gerenciar Cursos</a><br/></li>
+                <li><a href="{{ url_for('gerenciar_usuarios') }}">Gerenciar Permissões de Usuarios</a><br/></li>
+                {% endif %}
+                {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('perfil') }}">Perfil</a></li>
+                <li><a href="{{ url_for_security('logout') }}">Logout</a><br/></li>
+                {% endif %}
+            </ul>
+        </div>
 
     {% block body %}
 
     {% endblock %}
 </body>
-</html>
