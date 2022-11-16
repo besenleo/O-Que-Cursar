@@ -6,5 +6,12 @@
 
 {% block body %}
     {% include "_messages.html" %}
-    <h1> Home page </h1>
+    <h1 class="fw-bold display-2 text-center text-dark banner-heading">O Que Cursar?</h1>
+    <p class="text-dark fw-bold text-center container mt-5">
+      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Exercitationem molestiae illo et. Voluptatem aut repudiandae saepe placeat hic a amet quod magni, labore, laudantium optio dolores dolorum iste cupiditate quaerat?
+      Lorem ipsum dolor sit amet consectetur, adipisicing elit. Deleniti aliquid soluta repellendus laudantium enim veritatis optio id consectetur laborum architecto harum rerum cupiditate, ea reprehenderit tempore sunt! Vel, distinctio quisquam?
+    </p>
+    <div class="text-center">
+      <a href="{{ url_for('cursos')}} "> <button class="btn btn-outline-warning text-dark">Explore os cursos</button> </a>
+    </div>
 {% endblock %}
