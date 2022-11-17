@@ -1,15 +1,41 @@
-{% from "security/_macros.html" import render_field_with_errors, render_field %}
+{% from "security/_macros.html" import render_field_remember_me, render_field_with_errors, render_field %}
 {% include "security/_messages.html" %}
-<h1>{{ _('Register') }}</h1>
-<form action="{{ url_for_security('register') }}" method="POST" name="register_user_form">
-  {{ register_user_form.hidden_tag() }}
-  {{ render_field_with_errors(register_user_form.first_name) }}
-  {{ render_field_with_errors(register_user_form.last_name) }}
-  {{ render_field_with_errors(register_user_form.email) }}
-  {{ render_field_with_errors(register_user_form.password) }}
-  {% if register_user_form.password_confirm %}
-    {{ render_field_with_errors(register_user_form.password_confirm) }}
-  {% endif %}
-  {{ render_field(register_user_form.submit) }}
-</form>
-{% include "security/_menu.html" %}
+{% extends "base_navless.html" %}
+
+{% block header %}
+{% block title %} Cadastrar-se {% endblock %}
+{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+      <div class="col-md-6 text-center mb-5">
+          <h2 class="heading-section">O Que Cursar?</h2>
+      </div>
+  </div>
+  <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-4">
+              <div class="p-0">
+                  <h3 class="mb-4 text-center">Crie uma conta</h3>           
+                  <form action="{{ url_for_security('register') }}" method="POST" name="register_user_form">
+                      {{ register_user_form.hidden_tag() }}
+                      {{ render_field_with_errors(register_user_form.first_name, class="form-control", id="first_name", placeholder="Nome") }}
+                      {{ render_field_with_errors(register_user_form.last_name, class="form-control", id="last_name", placeholder="Sobrenome") }}
+                      {{ render_field_with_errors(register_user_form.email, class="form-control", id="email", placeholder="Email") }}
+                      {{ render_field_with_errors(register_user_form.password, class="form-control", id="password", placeholder="Senha") }}
+                      {% if register_user_form.password_confirm %}
+                        {{ render_field_with_errors(register_user_form.password_confirm) }}
+                      {% endif %}
+                      {{ render_field(register_user_form.submit, class="form-control btn btn-primary submit px-3", value="Criar conta") }}
+                  </form>
+                  <p class="w-100 text-center mt-3">— Já possui uma conta? —</p>
+                      <div class="social d-flex text-center">
+                        <a href="{{ url_for_security('login') }}" class="btn btn-secondary px-2 py-2 me-1 rounded w-50">Entrar</a>
+                        <a href="{{ url_for_security('send_confirmation') }}" class="btn btn-secondary px-2 py-2 ms-1 rounded w-50">Confirmar conta</a>
+                      </div>
+              </div>
+              
+      </div>
+  </div>
+</div>
+{% endblock %}

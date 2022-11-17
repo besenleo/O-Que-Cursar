@@ -1,9 +1,30 @@
 {% from "security/_macros.html" import render_field_with_errors, render_field %}
 {% include "security/_messages.html" %}
-<h1>{{ _('Resend confirmation instructions') }}</h1>
-<form action="{{ url_for_security('send_confirmation') }}" method="POST" name="send_confirmation_form">
-  {{ send_confirmation_form.hidden_tag() }}
-  {{ render_field_with_errors(send_confirmation_form.email) }}
-  {{ render_field(send_confirmation_form.submit) }}
-</form>
-{% include "security/_menu.html" %}
+{% extends "base_navless.html" %}
+
+{% block header %}
+{% block title %} Confirmar email{% endblock %}
+{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+      <div class="col-md-6 text-center mb-5">
+          <h2 class="heading-section">O Que Cursar?</h2>
+      </div>
+  </div>
+  <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-4">
+              <div class="p-0">
+                  <h3 class="mb-4 text-center">Mandar email de confirmação</h3>
+                  <form action="{{ url_for_security('send_confirmation') }}" method="POST" name="send_confirmation_form">
+                      {{ send_confirmation_form.hidden_tag() }}
+                      {{ render_field_with_errors(send_confirmation_form.email, class="form-control", placeholder="Email cadastrado") }}
+                      {{ render_field(send_confirmation_form.submit, class="form-control btn btn-primary submit px-3", value="Enviar confirmação") }}
+                  </form>
+              </div>
+              
+      </div>
+  </div>
+</div>
+{% endblock %}
