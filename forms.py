@@ -34,13 +34,13 @@ class ProfileForm(FlaskForm):
     ])
 
 class CourseForm(FlaskForm):
-    name = StringField('Nome', validators=[
+    name = StringField('Nome do Curso', validators=[
         InputRequired(),
-        Length(min=3, max=50)
+        Length(min=3, max=20)
     ])
-    description = TextAreaField('Descrição', validators=[
+    description = TextAreaField('Descrição do curso', validators=[
         InputRequired(),
-        Length(max=1000)
+        Length(max=255)
     ])
     type = SelectField('Tipo do Curso', choices=[
         ('Graduação', 'Graduação'),

@@ -37,8 +37,8 @@ class User(db.Model, UserMixin):
 
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key= True)
-    name = db.Column(db.String(50), nullable=False, unique=True)
-    description = db.Column(db.String(1000), nullable=False)
+    name = db.Column(db.String(20), nullable=False, unique=True)
+    description = db.Column(db.String(255), nullable=False)
     type = db.Column(db.String(15), nullable=False)
     active = db.Column(db.Boolean, nullable=False, default=True)
 

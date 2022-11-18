@@ -214,7 +214,7 @@ def create_app():
 
     @app.route('/cursos')
     def cursos():
-        courses = Course.query.all()
+        courses = Course.query.order_by(Course.name).all()
         return render_template('cursos.html', current_user=current_user, courses=courses)
     
     @app.route('/gerenciar_cursos', methods=['GET', 'POST'])
@@ -233,11 +233,11 @@ def create_app():
                 db.session.add(course)
                 db.session.commit()
                 flash('Curso adicionado com sucesso!', 'success')
-                return redirect(url_for('gerenciar_cursos'))
+                return redirect(url_for('cursos'))
             except:
                 db.session.rollback()
                 flash('Falha ao adicionar curso', 'error')
-                return redirect(url_for('gerenciar_cursos'))
+                return redirect(url_for('cursos'))
         
         courses = Course.query.all()
 
@@ -256,11 +256,11 @@ def create_app():
                 course.type = form.type.data
                 db.session.commit()
                 flash('Curso editado com sucesso!', 'success')
-                return redirect(url_for('gerenciar_cursos'))
+                return redirect(url_for('cursos'))
             except:
                 db.session.rollback()
                 flash('Falha ao editar curso', 'error')
-                return redirect(url_for('gerenciar_cursos'))
+                return redirect(url_for('cursos'))
 
         return render_template('editar_curso.html', current_user=current_user, form=form, course=course)
 
@@ -277,7 +277,7 @@ def create_app():
             db.session.rollback()
             flash('Falha ao remover curso', 'error')
 
-        return redirect(url_for('gerenciar_cursos'))
+        return redirect(url_for('cursos'))
 
     #######################
     # Post related routes #
