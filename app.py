@@ -145,7 +145,7 @@ def create_app():
             try:
                 user_datastore.remove_role_from_user(user=user, role=db_role)
                 db.session.commit()
-                flash(f'Usuario {user.email} rebaixado de {role}', 'success')
+                flash(f'Usuario {user.email} rebaixado de {role}', 'info')
             except:
                 db.session.rollback()
                 flash(f'Não foi possivel remover permissão!')
@@ -160,7 +160,7 @@ def create_app():
                 user = User.query.filter(User.id == user_id).first()
                 db.session.delete(user)
                 db.session.commit()
-                flash('Usuario removido!', 'success')
+                flash('Usuario removido!', 'info')
             except:
                 db.session.rollback()
                 flash('Falha ao remover usuario', 'error')
@@ -186,12 +186,12 @@ def create_app():
                 db.session.delete(post)
             # Commit changes to database
             db.session.commit()
-            flash('Usuario desativado!', 'success')
+            flash('Usuario desativado!', 'info')
         except Exception as e:
             db.session.rollback()
             flash(f'Falha ao desativadar usuario {e}', 'error')
         
-        return redirect(url_for('index'))
+        return redirect(url_for('gerenciar_usuarios'))
     
     @app.route('/reativar_conta/<user_id>')
     @roles_required('admin')
@@ -206,7 +206,7 @@ def create_app():
             db.session.rollback()
             flash('Falha ao reativar usuario', 'error')
         
-        return redirect(url_for('index'))
+        return redirect(url_for('gerenciar_usuarios'))
 
     #########################
     # Course related routes #

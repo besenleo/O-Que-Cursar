@@ -28,7 +28,7 @@ class ProfileForm(FlaskForm):
         InputRequired(),
         Length(min=3, max=50)
     ])
-    photo = FileField('Foto', validators=[
+    photo = FileField('Atualize sua foto de perfil', validators=[
         FileAllowed(['jpg', 'png', 'jpeg'], 'Imagens são permitidas em formato .jpg, .png e .jpeg'),
         FileSize(max_size=10485760)
     ])
