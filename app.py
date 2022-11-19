@@ -168,7 +168,7 @@ def create_app():
         else:
             flash('Voce nao tem permissão para realizar essa operação!', 'error')
         
-        return redirect(url_for('index'))
+        return redirect(url_for('gerenciar_usuarios'))
     
     @app.route('/desativar_conta/<user_id>')
     @roles_required('admin')
@@ -233,7 +233,7 @@ def create_app():
             try: 
                 db.session.add(course)
                 db.session.commit()
-                flash('Curso adicionado com sucesso!', 'success')
+                flash('Curso criado com sucesso!', 'success')
                 return redirect(url_for('cursos'))
             except:
                 db.session.rollback()
@@ -292,34 +292,6 @@ def create_app():
         # Query objects on database to populate template
         course = Course.query.filter(Course.name == course_name).first()
         posts = Post.query.order_by(desc(Post.creation_date)).filter(Post.courses.any(Course.name == course_name))
-        # Creating dynamic field for Post Form
-        courses = Course.query.all()
-        form_post.courses.choices = [(c.name, c.name) for c in courses]
-        # Post form action
-        if form_post.validate_on_submit():
-            content = form_post.content.data
-            courses_form = form_post.courses.data
-            post_image = form_post.image.data
-            
-            try: 
-                if post_image:
-                    image_filename = photos.save(post_image)
-                    image_url = photos.url(image_filename)
-                    post = Post(content=content, creation_date=datetime.now(), user=current_user, image=image_url) 
-                else:
-                    post = Post(content=content, creation_date=datetime.now(), user=current_user)            
-                # Adding the courses to post
-                for course_form in courses_form:
-                    for course in courses:
-                        if course.name == course_form:
-                            post.courses.append(course)
-                db.session.add(post)
-                db.session.commit()
-                return redirect(url_for('curso_home', course_name=course.name))
-            except:
-                db.session.rollback()
-                flash(f'Falha ao criar post!', 'error')
-                return redirect(url_for('curso_home', course_name=course.name))
         # Comment Form action
         if form_comment.validate_on_submit():
             content = form_comment.content.data
@@ -337,15 +309,15 @@ def create_app():
                     return redirect(url_for('curso_home', course_name=course.name))
                 else:
                     db.session.rollback()
-                    flash('Falha ao fazer comentario!', 'error')
+                    flash('Falha ao fazer comentário!', 'error')
                     return redirect(url_for('curso_home', course_name=course.name))
             except:
                 db.session.rollback()
-                flash('Falha ao fazer comentario!', 'error')
+                flash('Falha ao fazer comentário!', 'error')
                 return redirect(url_for('curso_home', course_name=course.name))
         
         return render_template('curso_home.html', current_user=current_user, course=course, 
-                                posts=posts, form_post=form_post, form_comment=form_comment)
+                                posts=posts, form_comment=form_comment)
 
 
     @app.route('/criar_post', methods=['GET', 'POST'])
@@ -376,7 +348,7 @@ def create_app():
                             post.courses.append(course)
                 db.session.add(post)
                 db.session.commit()
-                flash('Publicação criado com sucesso!', 'success')
+                flash('Publicação criada com sucesso!', 'success')
                 return redirect(url_for('criar_post'))
             except:
                 db.session.rollback()
@@ -407,11 +379,11 @@ def create_app():
                     return redirect(url_for('post', post_id=post_id_int))
                 else:
                     db.session.rollback()
-                    flash('Falha ao fazer comentario!', 'error')
+                    flash('Falha ao fazer comentário!', 'error')
                     return redirect(url_for('post', post_id=post_id_int))
             except:
                 db.session.rollback()
-                flash('Falha ao fazer comentario!', 'error')
+                flash('Falha ao fazer comentário!', 'error')
                 return redirect(url_for('post', post_id=post_id_int))
     
         return render_template('post.html', current_user=current_user, form=form, post=post_obj)
@@ -456,14 +428,14 @@ def create_app():
             try: 
                 db.session.delete(post)
                 db.session.commit()
-                flash('Post removido com sucesso!', 'success')
+                flash('Publicação removida com sucesso!', 'success')
             except:
                 db.session.rollback()
                 flash('Falha ao remover post', 'error')
         else:
-            flash('Voce não tem permissão para deletar esse post', 'error')
+            flash('Voce não tem permissão para deletar essa publicação', 'error')
             
-        return redirect(url_for('index'))
+        return redirect(url_for('perfil'))
     
     @app.route('/excluir_comentario/<comment_id>')
     def excluir_comentario(comment_id):
@@ -474,12 +446,12 @@ def create_app():
             try: 
                 db.session.delete(comment)
                 db.session.commit()
-                flash('Comentario removido com sucesso!', 'success')
+                flash('Comentário removido com sucesso!', 'success')
             except:
                 db.session.rollback()
-                flash('Falha ao remover comentario', 'error')
+                flash('Falha ao remover comentário', 'error')
         else:
-            flash('Voce não tem permissão para deletar esse comentario', 'error')
+            flash('Voce não tem permissão para deletar esse comentário', 'error')
             
         return redirect(url_for('perfil'))
 

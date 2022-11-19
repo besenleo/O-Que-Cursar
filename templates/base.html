@@ -24,8 +24,8 @@
               <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a href="{{ url_for('cursos') }}" class="nav-link text-white fw-bold">Cursos</a></li>
                 {% if current_user.is_authenticated and current_user.has_role('mentor') %}
-                <li class="nav-item"><a href="{{ url_for('criar_post') }}" class="nav-link text-white fw-bold">Criar Post</a></li>
-                <li class="nav-item"><a href="{{ url_for('meus_posts') }}" class="nav-link text-white fw-bold">Minhas Postagens</a></li>
+                <li class="nav-item"><a href="{{ url_for('criar_post') }}" class="nav-link text-white fw-bold">Criar Publicação</a></li>
+                <li class="nav-item"><a href="{{ url_for('meus_posts') }}" class="nav-link text-white fw-bold">Minhas Publicações</a></li>
                 {% endif %}
                 {% if current_user.is_authenticated and current_user.has_role('admin') %}
                 <li class="nav-item"><a href="{{ url_for('gerenciar_usuarios') }}" class="nav-link text-white fw-bold">Permissão de usuarios</a></li>
