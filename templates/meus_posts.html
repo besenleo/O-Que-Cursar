@@ -7,8 +7,10 @@
 
 {% block body %}
     {% include "_messages.html" %}
-    <h2> Minhas Postagens</h2>
-    {% for post in posts %}
-        {{ render_post(post, form, current_user, 'meus_posts') }}
-    {% endfor %}
+    <div class="container mt-5 mb-5">
+        <h2 class="text-center">Minhas Publicações</h2>
+            {% for post in posts %}
+                {{ render_post(post, form, current_user, 'meus_posts') }}
+            {% endfor%}
+    </div> 
 {% endblock %}

@@ -3,6 +3,7 @@ from flask import Flask, render_template, url_for, redirect, flash
 from flask_mail import Mail
 from flask_security import login_required, roles_required, roles_accepted, \
                         current_user, SQLAlchemyUserDatastore, Security
+from sqlalchemy import desc
 from model import db, User, Role, Course, Post, Comment
 from forms import ExtendedRegisterForm, CourseForm, PostForm, CommentForm, ProfileForm
 from flask_migrate import Migrate
@@ -290,7 +291,7 @@ def create_app():
         form_comment = CommentForm()
         # Query objects on database to populate template
         course = Course.query.filter(Course.name == course_name).first()
-        posts = Post.query.filter(Post.courses.any(Course.name == course_name))
+        posts = Post.query.order_by(desc(Post.creation_date)).filter(Post.courses.any(Course.name == course_name))
         # Creating dynamic field for Post Form
         courses = Course.query.all()
         form_post.courses.choices = [(c.name, c.name) for c in courses]
@@ -375,11 +376,11 @@ def create_app():
                             post.courses.append(course)
                 db.session.add(post)
                 db.session.commit()
-                flash('Post criado com sucesso!', 'success')
+                flash('Publicação criado com sucesso!', 'success')
                 return redirect(url_for('criar_post'))
             except:
                 db.session.rollback()
-                flash(f'Falha ao criar post!', 'error')
+                flash(f'Falha ao criar a publicação!', 'error')
                 return redirect(url_for('criar_post'))
         return render_template('criar_post.html', current_user=current_user, form=form)
 
@@ -419,7 +420,7 @@ def create_app():
     @roles_required('mentor')
     def meus_posts():
         form = CommentForm()
-        posts = Post.query.filter(Post.user.has(User.id == current_user.id))
+        posts = Post.query.order_by(desc(Post.creation_date)).filter(Post.user.has(User.id == current_user.id))
         # Comment form action
         if form.validate_on_submit():
             content = form.content.data
@@ -465,13 +466,11 @@ def create_app():
         return redirect(url_for('index'))
     
     @app.route('/excluir_comentario/<comment_id>')
-    @roles_accepted('admin', 'mentor')
     def excluir_comentario(comment_id):
         comment = Comment.query.filter(Comment.id == comment_id).first()
-        post = Post.query.filter(Post.id == comment.id_post).first()
 
         # Only the admin and post's creator can remove comments
-        if current_user.has_role('admin') or current_user.id == post.user.id:
+        if current_user.has_role('admin') or current_user.id == comment.user.id:
             try: 
                 db.session.delete(comment)
                 db.session.commit()
@@ -482,6 +481,6 @@ def create_app():
         else:
             flash('Voce não tem permissão para deletar esse comentario', 'error')
             
-        return redirect(url_for('index'))
+        return redirect(url_for('perfil'))
 
     return app
