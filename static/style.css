@@ -26,11 +26,3 @@
     border: none !important;
     transition:  0.5s;
 }
-
-.blog .blog-img{
-    background-image: url('books.jpg');
-    width: 50%;
-    height: 30rem;
-    background-size: cover;
-    background-position: center;
-}

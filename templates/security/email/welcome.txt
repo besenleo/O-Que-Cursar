@@ -1,7 +1,7 @@
-{{ _('Welcome %(email)s!', email=user.email) }}
+{{ _('Bem-vindo %(email)s!', email=user.email) }}
 
 {% if security.confirmable %}
-{{ _('You can confirm your email through the link below:') }}
+{{ _('Você pode confirmar seu e-mail através do link abaixo:') }}
 
 {{ confirmation_link }}
 {% endif %}

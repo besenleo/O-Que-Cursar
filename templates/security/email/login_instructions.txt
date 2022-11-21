@@ -1,5 +1,5 @@
-{{ _('Welcome %(email)s!', email=user.email) }}
+{{ _('Bem-vindo %(email)s!', email=user.email) }}
 
-{{ _('You can log into your account through the link below:') }}
+{{ _('Você pode acessar sua conta através do link abaixo:') }}
 
 {{ login_link }}
