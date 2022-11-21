@@ -1,1 +1,1 @@
-{{ _('Your password has been reset') }}
+{{ _('Sua senha foi redefinida') }}

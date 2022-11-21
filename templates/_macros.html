@@ -1,69 +1,139 @@
 {% macro render_field_with_errors(field) %}
-  <p>
-    {{ field.label }} {{ field(**kwargs)|safe }}
-    {% if field.errors %}
-      <ul>
-      {% for error in field.errors %}
-        <li>{{ error }}</li>
-      {% endfor %}
-      </ul>
+    <div class="form-group">
+      {{ field.label(class_="form-label")}}
+      {{ field(**kwargs) |safe }}
+      {% if field.errors %}
+      <div class="mt-1 alert alert-danger text-center" role="alert">
+        {% for error in field.errors %}
+          {{ error }}
+        {% endfor %}
+      </div>
     {% endif %}
-  </p>
+  </div>
+{% endmacro %}
+
+{% macro render_field_with_errors_wo_label(field) %}
+    <div class="form-group">
+      {{ field(**kwargs) |safe }}
+      {% if field.errors %}
+      <div class="mt-1 alert alert-danger text-center" role="alert">
+        {% for error in field.errors %}
+          {{ error }}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{% macro render_comment(comment, current_user) %}
+<div class="d-flex flex-row mt-3 ms-2"> 
+  {% if comment.user.profile_picture %} 
+  <img src="{{ comment.user.profile_picture }}" width="50" height="50" class="rounded-circle"> 
+  {% else %} 
+  <img src="{{ url_for('static', filename='default.jpg') }}" width="50" height="50" class="rounded-circle"> 
+  {% endif %} 
+    <div class="d-flex flex-column ms-2"> 
+      <span class="name">{{ comment.user.first_name }} {{ comment.user.last_name }}</span> 
+      <small>{{ comment.content }}</small>
+      <div class="d-flex flex-row align-items-center status"> 
+        {% if current_user.has_role('admin') or comment.id_user == current_user.id %}
+        <a href="{{ url_for('post', post_id=comment.id_post)}}" class="text-decoration-none"><small class="comment-text">Ver Publicação</small></a>
+        <a href="{{ url_for('excluir_comentario', comment_id=comment.id)}}" class="text-decoration-none"><small class="comment-text">Remover</small></a>
+        {% endif %}
+      </div>
+    </div>
+</div>
 {% endmacro %}
 
 {% macro render_post(post, comment_form, current_user, redirect_page) %}
   {% if post %} 
-  <div>
-    <ul>
-        {% if current_user.is_authenticated  %}
-          <li> Opções: <a href="{{ url_for('post', post_id=post.id)}}"> Ver detalhes </a>
-          {% if current_user.has_role('admin') or post.user.id == current_user.id %}
-          <a href="{{ url_for('excluir_post', post_id=post.id)}}"> Remover Post </a>
-          {% endif %}
-          </li>
-        {% endif %}
-      
-        <li> Autor: {{ post.user.first_name }} {{ post.user.last_name }} </li>
-        <li> Data: {{ post.creation_date.strftime('%d/%m/%Y %H:%M') }}</li>
-        <li> Conteudo: {{ post.content }}  </li>
-        {% if post.image %}
-          <img src="{{ post.image }}" style="height: 200px; width: 100px;" />
-        {% endif %}
-        
-        {% if current_user.is_authenticated  %}
-          {% if kwargs %}
-            <form method="POST" action="{{ url_for('%s' % redirect_page, **kwargs )}}">
-          {% else %}
-            <form method="POST" action="{{ url_for('%s' % redirect_page) }}">
-          {% endif %}
-              {{ comment_form.csrf_token }}
-              {{ comment_form.post_id(value=post.id) }}
-              {% call render_field_with_errors(comment_form.content) %} {% endcall %}
-              <input type="submit" value="Comentar">
-            </form>
-        {% endif %}
-        <p> Comentarios: </p>
-        <ul>
-            {% for comment in post.comments %}
-            {% if current_user.has_role('admin') or post.user.id == current_user.id %}
-            <li> Opções: <a href="{{ url_for('excluir_comentario', comment_id=comment.id)}}"> Remover </a> </li>
-            {% endif %}
-            <li> {{ comment.user.first_name }} {{ comment.user.last_name }} ({{ comment.creation_date.strftime('%d/%m/%Y %H:%M')}}): {{ comment.content }}</li>
-            <br>
-            {% endfor %}
-        </ul>
-    </ul>
-  </div>
-  <br>
+    <!--Post-->
+    <div class="row d-flex align-items-center justify-content-center mt-5">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="d-flex justify-content-between p-2 px-3">
+                    <div class="d-flex flex-row align-items-center"> 
+                        {% if post.user.profile_picture %} 
+                        <img src="{{ post.user.profile_picture }}" width="60" height="60" class="rounded-circle"> 
+                        {% else %} 
+                        <img src="{{ url_for('static', filename='default.jpg') }}" width="60" height="60" class="rounded-circle"> 
+                        {% endif %} 
+                        <div class="d-flex flex-column ms-2"> 
+                          <span class="font-weight-bold">{{ post.user.first_name }} {{ post.user.last_name }}</span> 
+                          {% if post.user.occupation %}<small class="text-muted">{{ post.user.occupation }}</small> {% endif %}
+                        </div>
+                    </div>
+                    <div class="d-flex flex-row mt-1 ellipsis"> <small class="mr-2">{{ post.creation_date.strftime('%d/%m/%Y') }}</small> 
+                     {% if current_user.has_role('admin') or post.user.id == current_user.id %}
+                     <button class="btn btn-flat btn-flat-icon btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots-vertical" viewBox="0 0 16 16">
+                          <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                      </svg>
+                     </button>
+                     <div class="dropdown-menu dropdown-scale dropdown-menu-right" role="menu" style="position: absolute; transform: translate3d(-136px, 28px, 0px); top: 0px; left: 0px; will-change: transform;">
+                      <a class="dropdown-item" href="{{ url_for('post', post_id=post.id)}}">Ver Detalhes</a>
+                      <a class="dropdown-item" href="{{ url_for('excluir_post', post_id=post.id)}}">Apagar Post</a>
+                     </div> 
+                     {% endif %}
+                    </div>
+                </div>
+                <p class="text-justify ps-1">{{ post.content }}</p>
+                {% if post.image %}
+                <img src="{{ post.image }}" class="img-fluid">
+                {% endif %}
+                <div class="p-2">
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex flex-row icons d-flex align-items-center"> <i class="fa fa-heart"></i> <i class="fa fa-smile-o ms-2"></i> </div>
+                        <div class="d-flex flex-row muted-color"> <span>{{ post.comments.count() }} comentário(s)</span></div>
+                    </div>
+                    <hr>
+                    <div class="comments">
+                      {% if current_user.is_authenticated  %}
+                      {% if kwargs %}
+                        <form method="POST" action="{{ url_for('%s' % redirect_page, **kwargs )}}">
+                      {% else %}
+                        <form method="POST" action="{{ url_for('%s' % redirect_page) }}">
+                      {% endif %}
+                        <div class="comment-input mt-3 container-fluid row">
+                          {{ comment_form.csrf_token }}
+                          {{ comment_form.post_id(value=post.id) }}
+                          <div class="col-11">
+                          {% call render_field_with_errors_wo_label(comment_form.content, class="form-control", placeholder="Comentar", rows="1") %} {% endcall %}
+                          </div>
+                          <div class="col-1" style="padding:0;margin:0">
+                              <button class="btn btn-primary" type="submit">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-send-fill" viewBox="0 0 16 16">
+                                  <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083l6-15Zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471-.47 1.178Z"/>
+                                  </svg>
+                              </button>
+                          </div>    
+                        </div>
+                        </form>
+                      {% endif %}
+                      {% for comment in post.comments %}
+                      <div class="d-flex flex-row mt-3 ms-2"> 
+                        {% if comment.user.profile_picture %} 
+                        <img src="{{ comment.user.profile_picture }}" width="50" height="50" class="rounded-circle"> 
+                        {% else %} 
+                        <img src="{{ url_for('static', filename='default.jpg') }}" width="50" height="50" class="rounded-circle"> 
+                        {% endif %} 
+                          <div class="d-flex flex-column ms-2"> 
+                            <span class="name">{{ comment.user.first_name }} {{ comment.user.last_name }}</span> 
+                            <small>{{ comment.content }}</small>
+                            <div class="d-flex flex-row align-items-center status"> 
+                              {% if current_user.has_role('admin') or comment.id_user == current_user.id %}
+                              <a href="{{ url_for('excluir_comentario', comment_id=comment.id)}}" class="text-decoration-none"><small class="comment-text">Remover</small></a>
+                              {% endif %}
+                            </div>
+                          </div>
+                      </div>
+                      {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Post-->
   {% endif %}
-{% endmacro %}
-
-{% macro render_comment(comment, current_user) %}
-  <ul>
-      {% if current_user.has_role('admin') or comment.id_user == current_user.id %}
-      <li> Opções: <a href="{{ url_for('post', post_id=comment.id_post)}}"> Ver post </a> <a href="{{ url_for('excluir_comentario', comment_id=comment.id)}}"> Remover </a></li>
-      {% endif %}
-      <li> {{ comment.user.first_name }} {{ comment.user.last_name }} ({{ comment.creation_date.strftime('%d/%m/%Y %H:%M')}}): {{ comment.content }}</li>
-      <br>
-  </ul>
 {% endmacro %}

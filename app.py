@@ -3,6 +3,7 @@ from flask import Flask, render_template, url_for, redirect, flash
 from flask_mail import Mail
 from flask_security import login_required, roles_required, roles_accepted, \
                         current_user, SQLAlchemyUserDatastore, Security
+from sqlalchemy import desc
 from model import db, User, Role, Course, Post, Comment
 from forms import ExtendedRegisterForm, CourseForm, PostForm, CommentForm, ProfileForm
 from flask_migrate import Migrate
@@ -145,7 +146,7 @@ def create_app():
             try:
                 user_datastore.remove_role_from_user(user=user, role=db_role)
                 db.session.commit()
-                flash(f'Usuario {user.email} rebaixado de {role}', 'success')
+                flash(f'Usuario {user.email} rebaixado de {role}', 'info')
             except:
                 db.session.rollback()
                 flash(f'Não foi possivel remover permissão!')
@@ -160,14 +161,14 @@ def create_app():
                 user = User.query.filter(User.id == user_id).first()
                 db.session.delete(user)
                 db.session.commit()
-                flash('Usuario removido!', 'success')
+                flash('Usuario removido!', 'info')
             except:
                 db.session.rollback()
                 flash('Falha ao remover usuario', 'error')
         else:
             flash('Voce nao tem permissão para realizar essa operação!', 'error')
         
-        return redirect(url_for('index'))
+        return redirect(url_for('gerenciar_usuarios'))
     
     @app.route('/desativar_conta/<user_id>')
     @roles_required('admin')
@@ -186,12 +187,12 @@ def create_app():
                 db.session.delete(post)
             # Commit changes to database
             db.session.commit()
-            flash('Usuario desativado!', 'success')
+            flash('Usuario desativado!', 'info')
         except Exception as e:
             db.session.rollback()
             flash(f'Falha ao desativadar usuario {e}', 'error')
         
-        return redirect(url_for('index'))
+        return redirect(url_for('gerenciar_usuarios'))
     
     @app.route('/reativar_conta/<user_id>')
     @roles_required('admin')
@@ -206,7 +207,7 @@ def create_app():
             db.session.rollback()
             flash('Falha ao reativar usuario', 'error')
         
-        return redirect(url_for('index'))
+        return redirect(url_for('gerenciar_usuarios'))
 
     #########################
     # Course related routes #
@@ -214,7 +215,7 @@ def create_app():
 
     @app.route('/cursos')
     def cursos():
-        courses = Course.query.all()
+        courses = Course.query.order_by(Course.name).all()
         return render_template('cursos.html', current_user=current_user, courses=courses)
     
     @app.route('/gerenciar_cursos', methods=['GET', 'POST'])
@@ -232,12 +233,12 @@ def create_app():
             try: 
                 db.session.add(course)
                 db.session.commit()
-                flash('Curso adicionado com sucesso!', 'success')
-                return redirect(url_for('gerenciar_cursos'))
+                flash('Curso criado com sucesso!', 'success')
+                return redirect(url_for('cursos'))
             except:
                 db.session.rollback()
                 flash('Falha ao adicionar curso', 'error')
-                return redirect(url_for('gerenciar_cursos'))
+                return redirect(url_for('cursos'))
         
         courses = Course.query.all()
 
@@ -256,11 +257,11 @@ def create_app():
                 course.type = form.type.data
                 db.session.commit()
                 flash('Curso editado com sucesso!', 'success')
-                return redirect(url_for('gerenciar_cursos'))
+                return redirect(url_for('cursos'))
             except:
                 db.session.rollback()
                 flash('Falha ao editar curso', 'error')
-                return redirect(url_for('gerenciar_cursos'))
+                return redirect(url_for('cursos'))
 
         return render_template('editar_curso.html', current_user=current_user, form=form, course=course)
 
@@ -277,7 +278,7 @@ def create_app():
             db.session.rollback()
             flash('Falha ao remover curso', 'error')
 
-        return redirect(url_for('gerenciar_cursos'))
+        return redirect(url_for('cursos'))
 
     #######################
     # Post related routes #
@@ -290,35 +291,7 @@ def create_app():
         form_comment = CommentForm()
         # Query objects on database to populate template
         course = Course.query.filter(Course.name == course_name).first()
-        posts = Post.query.filter(Post.courses.any(Course.name == course_name))
-        # Creating dynamic field for Post Form
-        courses = Course.query.all()
-        form_post.courses.choices = [(c.name, c.name) for c in courses]
-        # Post form action
-        if form_post.validate_on_submit():
-            content = form_post.content.data
-            courses_form = form_post.courses.data
-            post_image = form_post.image.data
-            
-            try: 
-                if post_image:
-                    image_filename = photos.save(post_image)
-                    image_url = photos.url(image_filename)
-                    post = Post(content=content, creation_date=datetime.now(), user=current_user, image=image_url) 
-                else:
-                    post = Post(content=content, creation_date=datetime.now(), user=current_user)            
-                # Adding the courses to post
-                for course_form in courses_form:
-                    for course in courses:
-                        if course.name == course_form:
-                            post.courses.append(course)
-                db.session.add(post)
-                db.session.commit()
-                return redirect(url_for('curso_home', course_name=course.name))
-            except:
-                db.session.rollback()
-                flash(f'Falha ao criar post!', 'error')
-                return redirect(url_for('curso_home', course_name=course.name))
+        posts = Post.query.order_by(desc(Post.creation_date)).filter(Post.courses.any(Course.name == course_name))
         # Comment Form action
         if form_comment.validate_on_submit():
             content = form_comment.content.data
@@ -336,15 +309,15 @@ def create_app():
                     return redirect(url_for('curso_home', course_name=course.name))
                 else:
                     db.session.rollback()
-                    flash('Falha ao fazer comentario!', 'error')
+                    flash('Falha ao fazer comentário!', 'error')
                     return redirect(url_for('curso_home', course_name=course.name))
             except:
                 db.session.rollback()
-                flash('Falha ao fazer comentario!', 'error')
+                flash('Falha ao fazer comentário!', 'error')
                 return redirect(url_for('curso_home', course_name=course.name))
         
         return render_template('curso_home.html', current_user=current_user, course=course, 
-                                posts=posts, form_post=form_post, form_comment=form_comment)
+                                posts=posts, form_comment=form_comment)
 
 
     @app.route('/criar_post', methods=['GET', 'POST'])
@@ -375,11 +348,11 @@ def create_app():
                             post.courses.append(course)
                 db.session.add(post)
                 db.session.commit()
-                flash('Post criado com sucesso!', 'success')
+                flash('Publicação criada com sucesso!', 'success')
                 return redirect(url_for('criar_post'))
             except:
                 db.session.rollback()
-                flash(f'Falha ao criar post!', 'error')
+                flash(f'Falha ao criar a publicação!', 'error')
                 return redirect(url_for('criar_post'))
         return render_template('criar_post.html', current_user=current_user, form=form)
 
@@ -406,11 +379,11 @@ def create_app():
                     return redirect(url_for('post', post_id=post_id_int))
                 else:
                     db.session.rollback()
-                    flash('Falha ao fazer comentario!', 'error')
+                    flash('Falha ao fazer comentário!', 'error')
                     return redirect(url_for('post', post_id=post_id_int))
             except:
                 db.session.rollback()
-                flash('Falha ao fazer comentario!', 'error')
+                flash('Falha ao fazer comentário!', 'error')
                 return redirect(url_for('post', post_id=post_id_int))
     
         return render_template('post.html', current_user=current_user, form=form, post=post_obj)
@@ -419,7 +392,7 @@ def create_app():
     @roles_required('mentor')
     def meus_posts():
         form = CommentForm()
-        posts = Post.query.filter(Post.user.has(User.id == current_user.id))
+        posts = Post.query.order_by(desc(Post.creation_date)).filter(Post.user.has(User.id == current_user.id))
         # Comment form action
         if form.validate_on_submit():
             content = form.content.data
@@ -455,33 +428,31 @@ def create_app():
             try: 
                 db.session.delete(post)
                 db.session.commit()
-                flash('Post removido com sucesso!', 'success')
+                flash('Publicação removida com sucesso!', 'success')
             except:
                 db.session.rollback()
                 flash('Falha ao remover post', 'error')
         else:
-            flash('Voce não tem permissão para deletar esse post', 'error')
+            flash('Voce não tem permissão para deletar essa publicação', 'error')
             
-        return redirect(url_for('index'))
+        return redirect(url_for('perfil'))
     
     @app.route('/excluir_comentario/<comment_id>')
-    @roles_accepted('admin', 'mentor')
     def excluir_comentario(comment_id):
         comment = Comment.query.filter(Comment.id == comment_id).first()
-        post = Post.query.filter(Post.id == comment.id_post).first()
 
         # Only the admin and post's creator can remove comments
-        if current_user.has_role('admin') or current_user.id == post.user.id:
+        if current_user.has_role('admin') or current_user.id == comment.user.id:
             try: 
                 db.session.delete(comment)
                 db.session.commit()
-                flash('Comentario removido com sucesso!', 'success')
+                flash('Comentário removido com sucesso!', 'success')
             except:
                 db.session.rollback()
-                flash('Falha ao remover comentario', 'error')
+                flash('Falha ao remover comentário', 'error')
         else:
-            flash('Voce não tem permissão para deletar esse comentario', 'error')
+            flash('Voce não tem permissão para deletar esse comentário', 'error')
             
-        return redirect(url_for('index'))
+        return redirect(url_for('perfil'))
 
     return app

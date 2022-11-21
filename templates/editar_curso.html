@@ -6,14 +6,20 @@
 {% endblock %}
 
 {% block body %}
-    <h1> Gerenciar Cursos </h1>
-    <br>
-    <h2> Editar Curso</h2>
-    <form method="POST" action="{{ url_for('editar_curso', course_id=course.id) }}">
+{% include "_messages.html" %}
+    
+<div class="container mt-5">
+    <h1> Editar Curso </h1>
+    <p> Altere as informações abaixo conforme necessário </p>
+    <form method="POST" action="{{ url_for('editar_curso', course_id=course.id) }}" class="row g-3 mt-3">
         {{ form.csrf_token }}
-        {{ render_field_with_errors(form.name) }}
-        {{ render_field_with_errors(form.description) }}
-        {{ render_field_with_errors(form.type) }}
-        <input type="submit" value="Salvar Mudanças">
-    </form>
+        {{ render_field_with_errors(form.name, class="form-control", id="name") }}
+        {{ render_field_with_errors(form.type, class="form-select", id="type") }}
+        {{ render_field_with_errors(form.description, class="form-control", id="description", rows="5") }}
+        <div class="form-group">
+          <button class="btn btn-success" type="submit">Salvar Mudanças</button>
+        </div>
+      </form>
+</div>
+
 {% endblock %}

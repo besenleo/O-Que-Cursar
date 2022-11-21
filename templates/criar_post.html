@@ -6,14 +6,18 @@
 {% endblock %}
 
 {% block body %}
-    <h1> Criar Post </h1>
+<div class="container mt-5 mb-5">
     {% include "_messages.html" %}
-    <form method="POST" action="{{ url_for('criar_post')}}" enctype="multipart/form-data">
+    <h1> Criar Publicação </h1>
+    <p> Preencha os campos com as informações da publicação</p>
+    <form method="POST" action="{{ url_for('criar_post')}}" enctype="multipart/form-data" class="row g-3 mt-3">
         {{ form.csrf_token }}
-        {{ render_field_with_errors(form.courses) }}
-        {{ render_field_with_errors(form.content) }}
-        {{ render_field_with_errors(form.image) }}
-        <input type="submit" value="Postar">
-    </form>
-    <br>
+        {{ render_field_with_errors(form.courses, class="form-select", size="4", id="courses") }}
+        {{ render_field_with_errors(form.content, class="form-control", id="description", rows="5") }}
+        {{ render_field_with_errors(form.image, class="form-control", id="image") }}
+        <div class="form-group">
+          <button class="btn btn-success" type="submit">Criar publicação</button>
+        </div>
+      </form>
+</div>
 {% endblock %}

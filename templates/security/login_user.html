@@ -1,12 +1,44 @@
-{% from "security/_macros.html" import render_field_with_errors, render_field %}
+{% from "security/_macros.html" import render_field_remember_me, render_field_with_errors, render_field %}
 {% include "security/_messages.html" %}
-<h1>{{ _('Login') }}</h1>
-<form action="{{ url_for_security('login') }}" method="POST" name="login_user_form">
-  {{ login_user_form.hidden_tag() }}
-  {{ render_field_with_errors(login_user_form.email) }}
-  {{ render_field_with_errors(login_user_form.password) }}
-  {{ render_field_with_errors(login_user_form.remember) }}
-  {{ render_field(login_user_form.next) }}
-  {{ render_field(login_user_form.submit) }}
-</form>
-{% include "security/_menu.html" %}
+{% extends "base_navless.html" %}
+
+{% block header %}
+{% block title %} {{ _('Login') }} {% endblock %}
+{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+      <div class="col-md-6 text-center mb-5">
+          <h2 class="heading-section">O Que Cursar?</h2>
+      </div>
+  </div>
+  <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-4">
+              <div class="p-0">
+                  <h3 class="mb-4 text-center">Já possui uma conta?</h3>           
+                  <form action="{{ url_for_security('login') }}" method="POST" name="login_user_form">
+                      {{ login_user_form.hidden_tag() }}
+                      {{ render_field_with_errors(login_user_form.email, class="form-control", id="email", placeholder="Email") }}
+                      {{ render_field_with_errors(login_user_form.password, class="form-control", id="password", placeholder="Senha") }}
+                      {{ render_field(login_user_form.submit, class="form-control btn btn-primary submit px-3", value="Entrar") }}
+                      <div class="form-group d-md-flex mt-2">
+                        <div class="w-50 checkbox">
+                          <label class="checkbox-wrap checkbox-primary">
+                            Lembre de mim {{ render_field_remember_me(login_user_form.remember) }}
+                        </div>  
+                        <div class="w-50 text-md-end">
+                           <a href="{{ url_for_security('forgot_password') }}"" style="color: rgb(0, 0, 0)">Esqueceu a senha?</a>
+                        </div>
+                      </div>
+                  </form>
+                  <p class="w-100 text-center mt-3">— Não possui uma conta? —</p>
+                  <div class="social d-flex text-center">
+                    <a href="{{ url_for_security('register') }}" class="btn btn-secondary px-2 py-2 me-1 rounded w-100">Registrar-se</a>
+                  </div>
+              </div>
+              
+      </div>
+  </div>
+</div>
+{% endblock %}

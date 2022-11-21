@@ -37,8 +37,8 @@ class User(db.Model, UserMixin):
 
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key= True)
-    name = db.Column(db.String(50), nullable=False, unique=True)
-    description = db.Column(db.String(1000), nullable=False)
+    name = db.Column(db.String(20), nullable=False, unique=True)
+    description = db.Column(db.String(255), nullable=False)
     type = db.Column(db.String(15), nullable=False)
     active = db.Column(db.Boolean, nullable=False, default=True)
 
@@ -60,7 +60,7 @@ class Post(db.Model):
 
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key= True)
-    content = db.Column(db.String(280), nullable=False)
+    content = db.Column(db.String(100), nullable=False)
     creation_date = db.Column(db.DateTime, nullable=False)
     id_post = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
     id_user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)

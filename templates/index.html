@@ -6,5 +6,29 @@
 
 {% block body %}
     {% include "_messages.html" %}
-    <h1> Home page </h1>
+    <div class="banner">
+      <h1 class="fw-bold display-2 text-center text-dark banner-heading">O Que Cursar?</h1>
+      <p class="text-dark fw-bold text-center container mt-5">
+      É uma escolha dificil, mas aqui você pode aprender mais sobre suas opções! 
+      Explore e aprenda sobre os cursos de graduação, licenciatura e pós-graduação disponiveis na UNIP Swift através de publicações feitas por profissionais da universidade de cada area.
+      Você vai receber dicas, interagir e tirar suas dúvidas diretamente com pessoas que conhecem a area que você deseja ingressar.
+      </p>
+      <div class="text-center">
+        <a href="{{ url_for('cursos')}} "> <button class="btn btn-outline-info text-white banner-btn">Explore os cursos</button> </a>
+      </div>
+    </div>
+    <section class="blog mt-5">
+      <div class="container">
+          <div class="text-center">
+            <h3 class="fw-bold text-center text-dark">Aprenda de quem sabe!</h3>
+            <p class="text-dark text-justify mt-5">
+              Obtenha conhecimento e tire dúvidas sobre os cursos diretamente de profissionais que trabalham e conhecem o mercado de trabalho.
+              Ter informações úteis e confiáveis ajuda no processo de escolha de um curso superior.
+            </p>
+            <img src="{{ url_for('static', filename='books.jpg') }}" class="img-fluid">
+          </div>
+          <img>
+        </div>
+      </div>
+    </section>
 {% endblock %}

@@ -28,19 +28,19 @@ class ProfileForm(FlaskForm):
         InputRequired(),
         Length(min=3, max=50)
     ])
-    photo = FileField('Foto', validators=[
+    photo = FileField('Atualize sua foto de perfil', validators=[
         FileAllowed(['jpg', 'png', 'jpeg'], 'Imagens são permitidas em formato .jpg, .png e .jpeg'),
         FileSize(max_size=10485760)
     ])
 
 class CourseForm(FlaskForm):
-    name = StringField('Nome', validators=[
+    name = StringField('Nome do Curso', validators=[
         InputRequired(),
-        Length(min=3, max=50)
+        Length(min=3, max=20)
     ])
-    description = TextAreaField('Descrição', validators=[
+    description = TextAreaField('Descrição do curso', validators=[
         InputRequired(),
-        Length(max=1000)
+        Length(max=255)
     ])
     type = SelectField('Tipo do Curso', choices=[
         ('Graduação', 'Graduação'),
@@ -49,21 +49,21 @@ class CourseForm(FlaskForm):
 
 
 class PostForm(FlaskForm):
-    content = TextAreaField('Conteudo', validators=[
+    content = TextAreaField('Conteúdo', validators=[
         InputRequired(),
         Length(max=300)
     ])
-    courses = SelectMultipleField('Cursos', validators=[InputRequired()])
-    image = FileField('Imagem', validators=[
+    courses = SelectMultipleField('Selecione os cursos que receberam a publicação:', validators=[InputRequired()])
+    image = FileField('Coloque uma imagem junto a publicação', validators=[
         FileAllowed(['jpg', 'png', 'jpeg'], 'Apenas imagens em formato .jpg, .png e .jpeg são permitidas'),
         FileSize(max_size=10485760)
     ])
 
 
 class CommentForm(FlaskForm):
-    content = TextAreaField('Comentario', validators=[
+    content = StringField('Comentario', validators=[
         InputRequired(),
-        Length(max=300)
+        Length(max=100)
     ])
     post_id = HiddenField('Post_id', validators=[
         InputRequired()

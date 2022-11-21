@@ -6,23 +6,19 @@
 {% endblock %}
 
 {% block body %}
-    <h1> Gerenciar Cursos </h1>
-    <br>
     {% include "_messages.html" %}
-    <br>
-    <h2> Adicionar Curso</h2>
-    <form method="POST" action="{{ url_for('gerenciar_cursos')}}">
-        {{ form.csrf_token }}
-        {{ render_field_with_errors(form.name) }}
-        {{ render_field_with_errors(form.description) }}
-        {{ render_field_with_errors(form.type) }}
-        <input type="submit" value="Adicionar Curso">
-    </form>
-    <br>
-    <h2> Lista de Cursos</h2>
-    <ul>
-    {% for course in courses %}
-        <li>{{ course.name }} <a href="{{ url_for('editar_curso', course_id=course.id) }}"> Editar </a> <a href="{{ url_for('excluir_curso', course_id=course.id) }}"> Remover </a></li>
-    {% endfor %}
-    </ul>
+    
+    <div class="container mt-5">
+        <h1> Adicionar Curso </h1>
+        <p> Preencha os campos abaixo com as informações dos cursos que deseja adicionar</p>
+        <form method="POST" action="{{ url_for('gerenciar_cursos')}}" class="row g-3 mt-3">
+            {{ form.csrf_token }}
+            {{ render_field_with_errors(form.name, class="form-control", id="name") }}
+            {{ render_field_with_errors(form.type, class="form-select", id="type") }}
+            {{ render_field_with_errors(form.description, class="form-control", id="description", rows="5") }}
+            <div class="form-group">
+              <button class="btn btn-success" type="submit">Adicionar curso</button>
+            </div>
+          </form>
+    </div>
 {% endblock %}
