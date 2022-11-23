@@ -47,7 +47,7 @@ class Course(db.Model):
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key= True)
-    content = db.Column(db.String(300), nullable=False)
+    content = db.Column(db.String(500), nullable=True)
     creation_date = db.Column(db.DateTime, nullable=False)
     image = db.Column(db.String(50))
     id_user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)

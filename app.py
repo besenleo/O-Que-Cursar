@@ -124,7 +124,7 @@ def create_app():
             try:
                 user_datastore.add_role_to_user(user=user, role=db_role)
                 db.session.commit()
-                flash(f'Usuario {user.email} promovido para {role}', 'success')
+                flash(f'Usuário {user.email} promovido para {role}', 'success')
             except:
                 db.session.rollback()
                 flash(f'Não foi possivel adicionar permissão!')
@@ -146,7 +146,7 @@ def create_app():
             try:
                 user_datastore.remove_role_from_user(user=user, role=db_role)
                 db.session.commit()
-                flash(f'Usuario {user.email} rebaixado de {role}', 'info')
+                flash(f'Usuário {user.email} rebaixado de {role}', 'info')
             except:
                 db.session.rollback()
                 flash(f'Não foi possivel remover permissão!')
@@ -161,7 +161,7 @@ def create_app():
                 user = User.query.filter(User.id == user_id).first()
                 db.session.delete(user)
                 db.session.commit()
-                flash('Usuario removido!', 'info')
+                flash('Usuário removido!', 'info')
             except:
                 db.session.rollback()
                 flash('Falha ao remover usuario', 'error')
@@ -187,7 +187,7 @@ def create_app():
                 db.session.delete(post)
             # Commit changes to database
             db.session.commit()
-            flash('Usuario desativado!', 'info')
+            flash('Usuário desativado!', 'info')
         except Exception as e:
             db.session.rollback()
             flash(f'Falha ao desativadar usuario {e}', 'error')
@@ -202,7 +202,7 @@ def create_app():
             user = User.query.filter(User.id == user_id).first()
             user.active = True
             db.session.commit()
-            flash('Usuario reativado!', 'success')
+            flash('Usuário reativado!', 'success')
         except:
             db.session.rollback()
             flash('Falha ao reativar usuario', 'error')
@@ -339,6 +339,9 @@ def create_app():
                     image_filename = photos.save(post_image)
                     image_url = photos.url(image_filename)
                     post = Post(content=content, creation_date=datetime.now(), user=current_user, image=image_url) 
+                elif not post_image and not content:
+                    flash('Por favor adicione um texto e/ou uma imagem', 'info')
+                    return redirect(url_for('meus_posts'))
                 else:
                     post = Post(content=content, creation_date=datetime.now(), user=current_user)           
                 # Adding the courses to post

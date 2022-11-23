@@ -50,8 +50,7 @@ class CourseForm(FlaskForm):
 
 class PostForm(FlaskForm):
     content = TextAreaField('Conteúdo', validators=[
-        InputRequired(),
-        Length(max=300)
+        Length(max=500)
     ])
     courses = SelectMultipleField('Selecione os cursos que receberam a publicação:', validators=[InputRequired()])
     image = FileField('Coloque uma imagem junto a publicação', validators=[
