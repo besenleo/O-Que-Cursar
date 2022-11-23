@@ -30,7 +30,7 @@ class ProfileForm(FlaskForm):
     ])
     photo = FileField('Atualize sua foto de perfil', validators=[
         FileAllowed(['jpg', 'png', 'jpeg'], 'Imagens são permitidas em formato .jpg, .png e .jpeg'),
-        FileSize(max_size=10485760)
+        FileSize(max_size=1048576000)
     ])
 
 class CourseForm(FlaskForm):
@@ -56,7 +56,7 @@ class PostForm(FlaskForm):
     courses = SelectMultipleField('Selecione os cursos que receberam a publicação:', validators=[InputRequired()])
     image = FileField('Coloque uma imagem junto a publicação', validators=[
         FileAllowed(['jpg', 'png', 'jpeg'], 'Apenas imagens em formato .jpg, .png e .jpeg são permitidas'),
-        FileSize(max_size=10485760)
+        FileSize(max_size=1048576000)
     ])
 
 

@@ -349,7 +349,7 @@ def create_app():
                 db.session.add(post)
                 db.session.commit()
                 flash('Publicação criada com sucesso!', 'success')
-                return redirect(url_for('criar_post'))
+                return redirect(url_for('meus_posts'))
             except:
                 db.session.rollback()
                 flash(f'Falha ao criar a publicação!', 'error')
