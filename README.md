@@ -1,5 +1,8 @@
 # O Que Cursar
 
+This project was part of my final tesis for my Computer Science Bacharel Degree.
+As part of requirements, the whole project will be (mostly) on Brazilian-Portuguese.
+
 ## Configurando seu ambiente
 
 Instale Python 3.9 ou superior  e PostgreSQL 12 ou superior na maquina que rodará o site.
